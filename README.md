@@ -22,7 +22,7 @@
 - [Tech Stack & Development Plan](#-tech-stack--development-plan)
 - [2-Minute Video](#-2-minute-video)
 
-**Implementation Detail** *(for judges who dig)*
+**Implementation Detail** *(technical depth)*
 - [Part 1 · Baseline Income Estimation](#part-1--baseline-income-estimation)
 - [Part 2 · Disruption Risk Modelling](#part-2--disruption-risk-modelling)
 - [Part 3 · Dynamic Premium Pricing](#part-3--dynamic-premium-pricing)
