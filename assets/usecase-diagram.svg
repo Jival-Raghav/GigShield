@@ -1,0 +1,84 @@
+<svg width="900" height="420" viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="420" fill="#F8FAFC" rx="12"/>
+  <rect x="1" y="1" width="898" height="418" rx="12" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
+
+  <!-- title -->
+  <text x="450" y="30" font-family="Georgia, serif" font-size="16" font-weight="700" fill="#1E293B" text-anchor="middle">GigShield — Use Case Diagram</text>
+  <line x1="250" y1="38" x2="650" y2="38" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- System boundary -->
+  <rect x="240" y="50" width="420" height="340" rx="8" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="450" y="68" font-family="Arial, sans-serif" font-size="11" fill="#64748B" text-anchor="middle">«system»  GigShield Platform</text>
+
+  <!-- Use case ellipses - worker side -->
+  <ellipse cx="390" cy="110" rx="75" ry="20" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.2"/>
+  <text x="390" y="114" font-family="Arial, sans-serif" font-size="11" fill="#1E3A8A" text-anchor="middle">Register &amp; Onboard</text>
+
+  <ellipse cx="390" cy="160" rx="75" ry="20" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.2"/>
+  <text x="390" y="164" font-family="Arial, sans-serif" font-size="11" fill="#1E3A8A" text-anchor="middle">Choose Coverage Tier</text>
+
+  <ellipse cx="390" cy="210" rx="75" ry="20" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.2"/>
+  <text x="390" y="214" font-family="Arial, sans-serif" font-size="11" fill="#1E3A8A" text-anchor="middle">Pay Weekly Premium</text>
+
+  <ellipse cx="390" cy="260" rx="75" ry="20" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.2"/>
+  <text x="390" y="264" font-family="Arial, sans-serif" font-size="11" fill="#1E3A8A" text-anchor="middle">View Claim Status</text>
+
+  <ellipse cx="390" cy="310" rx="75" ry="20" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.2"/>
+  <text x="390" y="314" font-family="Arial, sans-serif" font-size="11" fill="#1E3A8A" text-anchor="middle">Receive Payout Notification</text>
+
+  <ellipse cx="390" cy="360" rx="75" ry="20" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.2"/>
+  <text x="390" y="364" font-family="Arial, sans-serif" font-size="11" fill="#1E3A8A" text-anchor="middle">View Trust Score</text>
+
+  <!-- Use case ellipses - system/insurer side -->
+  <ellipse cx="545" cy="130" rx="80" ry="20" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.2"/>
+  <text x="545" y="134" font-family="Arial, sans-serif" font-size="11" fill="#14532D" text-anchor="middle">Auto-Detect Disruption</text>
+
+  <ellipse cx="545" cy="185" rx="80" ry="20" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.2"/>
+  <text x="545" y="189" font-family="Arial, sans-serif" font-size="11" fill="#14532D" text-anchor="middle">Validate Claim (BAF)</text>
+
+  <ellipse cx="545" cy="240" rx="80" ry="20" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.2"/>
+  <text x="545" y="244" font-family="Arial, sans-serif" font-size="11" fill="#14532D" text-anchor="middle">Calculate Payout</text>
+
+  <ellipse cx="545" cy="295" rx="80" ry="20" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.2"/>
+  <text x="545" y="299" font-family="Arial, sans-serif" font-size="11" fill="#14532D" text-anchor="middle">Update Trust Score</text>
+
+  <ellipse cx="545" cy="350" rx="80" ry="20" fill="#FEF3C7" stroke="#D97706" stroke-width="1.2"/>
+  <text x="545" y="354" font-family="Arial, sans-serif" font-size="11" fill="#78350F" text-anchor="middle">Flag for Audit Review</text>
+
+  <!-- Worker actor (left) -->
+  <!-- head -->
+  <circle cx="110" cy="185" r="18" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="110" y="191" font-family="Arial" font-size="18" text-anchor="middle">👤</text>
+  <!-- body -->
+  <line x1="110" y1="203" x2="110" y2="240" stroke="#2563EB" stroke-width="2"/>
+  <line x1="80" y1="220" x2="140" y2="220" stroke="#2563EB" stroke-width="2"/>
+  <line x1="110" y1="240" x2="85" y2="270" stroke="#2563EB" stroke-width="2"/>
+  <line x1="110" y1="240" x2="135" y2="270" stroke="#2563EB" stroke-width="2"/>
+  <text x="110" y="290" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#1D4ED8" text-anchor="middle">Worker</text>
+  <text x="110" y="305" font-family="Arial, sans-serif" font-size="10" fill="#64748B" text-anchor="middle">(Ravi / Priya / Suresh)</text>
+
+  <!-- Insurer actor (right) -->
+  <circle cx="790" cy="200" r="18" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.5"/>
+  <text x="790" y="206" font-family="Arial" font-size="18" text-anchor="middle">🏢</text>
+  <line x1="790" y1="218" x2="790" y2="255" stroke="#16A34A" stroke-width="2"/>
+  <line x1="760" y1="235" x2="820" y2="235" stroke="#16A34A" stroke-width="2"/>
+  <line x1="790" y1="255" x2="765" y2="285" stroke="#16A34A" stroke-width="2"/>
+  <line x1="790" y1="255" x2="815" y2="285" stroke="#16A34A" stroke-width="2"/>
+  <text x="790" y="305" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#15803D" text-anchor="middle">Insurer / Admin</text>
+
+  <!-- Worker connections -->
+  <line x1="130" y1="190" x2="313" y2="115" stroke="#2563EB" stroke-width="1" stroke-dasharray="none" opacity="0.5"/>
+  <line x1="130" y1="200" x2="313" y2="162" stroke="#2563EB" stroke-width="1" opacity="0.5"/>
+  <line x1="130" y1="210" x2="313" y2="210" stroke="#2563EB" stroke-width="1" opacity="0.5"/>
+  <line x1="130" y1="220" x2="313" y2="258" stroke="#2563EB" stroke-width="1" opacity="0.5"/>
+  <line x1="130" y1="225" x2="313" y2="308" stroke="#2563EB" stroke-width="1" opacity="0.5"/>
+  <line x1="130" y1="230" x2="313" y2="358" stroke="#2563EB" stroke-width="1" opacity="0.5"/>
+
+  <!-- Insurer connections -->
+  <line x1="767" y1="215" x2="627" y2="295" stroke="#16A34A" stroke-width="1" opacity="0.5"/>
+  <line x1="767" y1="220" x2="627" y2="350" stroke="#D97706" stroke-width="1" opacity="0.5"/>
+
+  <!-- include arrows between use cases -->
+  <line x1="468" y1="185" x2="463" y2="185" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="488" y="175" font-family="Arial, sans-serif" font-size="9" fill="#94A3B8" text-anchor="middle">«include»</text>
+</svg>

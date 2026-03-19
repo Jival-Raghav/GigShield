@@ -1,0 +1,56 @@
+<svg width="900" height="140" viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="b1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#DBEAFE"/><stop offset="100%" style="stop-color:#BFDBFE"/></linearGradient>
+    <linearGradient id="b2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#EDE9FE"/><stop offset="100%" style="stop-color:#DDD6FE"/></linearGradient>
+    <linearGradient id="b3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#FEF9C3"/><stop offset="100%" style="stop-color:#FDE68A"/></linearGradient>
+    <linearGradient id="b4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#FFE4E6"/><stop offset="100%" style="stop-color:#FECDD3"/></linearGradient>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <!-- Box 1: Baseline -->
+  <rect x="10" y="20" width="190" height="100" rx="10" fill="url(#b1)" stroke="#93C5FD" stroke-width="1.5"/>
+  <rect x="10" y="20" width="190" height="32" rx="10" fill="#2563EB"/>
+  <rect x="10" y="40" width="190" height="12" fill="#2563EB"/>
+  <text x="105" y="41" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="white" text-anchor="middle">🔵  Part 1</text>
+  <text x="105" y="72" font-family="Georgia, serif" font-size="14" font-weight="700" fill="#1E3A8A" text-anchor="middle">Baseline Income</text>
+  <text x="105" y="90" font-family="Arial, sans-serif" font-size="11" fill="#1D4ED8" text-anchor="middle">What should you</text>
+  <text x="105" y="106" font-family="Arial, sans-serif" font-size="11" fill="#1D4ED8" text-anchor="middle">have earned?</text>
+
+  <!-- Arrow 1 -->
+  <line x1="202" y1="70" x2="228" y2="70" stroke="#94A3B8" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Box 2: Risk -->
+  <rect x="230" y="20" width="190" height="100" rx="10" fill="url(#b2)" stroke="#C4B5FD" stroke-width="1.5"/>
+  <rect x="230" y="20" width="190" height="32" rx="10" fill="#7C3AED"/>
+  <rect x="230" y="40" width="190" height="12" fill="#7C3AED"/>
+  <text x="325" y="41" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="white" text-anchor="middle">🟣  Part 2</text>
+  <text x="325" y="72" font-family="Georgia, serif" font-size="14" font-weight="700" fill="#4C1D95" text-anchor="middle">Risk Modelling</text>
+  <text x="325" y="90" font-family="Arial, sans-serif" font-size="11" fill="#5B21B6" text-anchor="middle">How bad could</text>
+  <text x="325" y="106" font-family="Arial, sans-serif" font-size="11" fill="#5B21B6" text-anchor="middle">this week get?</text>
+
+  <!-- Arrow 2 -->
+  <line x1="422" y1="70" x2="448" y2="70" stroke="#94A3B8" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Box 3: Premium -->
+  <rect x="450" y="20" width="190" height="100" rx="10" fill="url(#b3)" stroke="#FCD34D" stroke-width="1.5"/>
+  <rect x="450" y="20" width="190" height="32" rx="10" fill="#D97706"/>
+  <rect x="450" y="40" width="190" height="12" fill="#D97706"/>
+  <text x="545" y="41" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="white" text-anchor="middle">🟡  Part 3</text>
+  <text x="545" y="72" font-family="Georgia, serif" font-size="14" font-weight="700" fill="#78350F" text-anchor="middle">Premium Pricing</text>
+  <text x="545" y="90" font-family="Arial, sans-serif" font-size="11" fill="#92400E" text-anchor="middle">What's fair</text>
+  <text x="545" y="106" font-family="Arial, sans-serif" font-size="11" fill="#92400E" text-anchor="middle">to charge?</text>
+
+  <!-- Arrow 3 -->
+  <line x1="642" y1="70" x2="668" y2="70" stroke="#94A3B8" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Box 4: Payout -->
+  <rect x="670" y="20" width="220" height="100" rx="10" fill="url(#b4)" stroke="#FCA5A5" stroke-width="1.5"/>
+  <rect x="670" y="20" width="220" height="32" rx="10" fill="#DC2626"/>
+  <rect x="670" y="40" width="220" height="12" fill="#DC2626"/>
+  <text x="780" y="41" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="white" text-anchor="middle">🔴  Part 4</text>
+  <text x="780" y="72" font-family="Georgia, serif" font-size="14" font-weight="700" fill="#7F1D1D" text-anchor="middle">Validation &amp; Payout</text>
+  <text x="780" y="90" font-family="Arial, sans-serif" font-size="11" fill="#991B1B" text-anchor="middle">Was the claim real?</text>
+  <text x="780" y="106" font-family="Arial, sans-serif" font-size="11" fill="#991B1B" text-anchor="middle">How much to pay?</text>
+</svg>

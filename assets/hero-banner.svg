@@ -1,0 +1,41 @@
+<svg width="900" height="200" viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F2647"/>
+      <stop offset="60%" style="stop-color:#1A3F7A"/>
+      <stop offset="100%" style="stop-color:#0D3D6E"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#38BDF8"/>
+      <stop offset="100%" style="stop-color:#6366F1"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="200" fill="url(#bg)" rx="12"/>
+  <!-- decorative circles -->
+  <circle cx="820" cy="40" r="80" fill="#1E4A8A" opacity="0.4"/>
+  <circle cx="860" cy="160" r="60" fill="#1E4A8A" opacity="0.3"/>
+  <circle cx="80" cy="180" r="50" fill="#1E4A8A" opacity="0.2"/>
+  <!-- accent line -->
+  <rect x="40" y="40" width="4" height="120" fill="url(#accent)" rx="2"/>
+  <!-- title -->
+  <text x="60" y="85" font-family="Georgia, serif" font-size="48" font-weight="700" fill="#FFFFFF">GigShield</text>
+  <text x="62" y="108" font-family="Georgia, serif" font-size="14" fill="url(#accent)" letter-spacing="3">BY INSUREEASE</text>
+  <!-- tagline -->
+  <text x="60" y="138" font-family="Arial, sans-serif" font-size="14" fill="#93C5FD">Parametric income insurance for India's gig delivery workers</text>
+  <text x="60" y="157" font-family="Arial, sans-serif" font-size="14" fill="#93C5FD">— automatic, fair, instant.</text>
+  <!-- team -->
+  <text x="60" y="182" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Janya Mahesh · Idhant Singh · Jival Raghav · Inesh Shanmugam</text>
+  <!-- pills -->
+  <rect x="540" y="55" width="130" height="28" rx="14" fill="#1E3A5F" stroke="#38BDF8" stroke-width="1"/>
+  <text x="605" y="74" font-family="Arial, sans-serif" font-size="12" fill="#38BDF8" text-anchor="middle">⚡ Payouts &lt; 2 hrs</text>
+  <rect x="540" y="93" width="130" height="28" rx="14" fill="#1E3A5F" stroke="#818CF8" stroke-width="1"/>
+  <text x="605" y="112" font-family="Arial, sans-serif" font-size="12" fill="#818CF8" text-anchor="middle">🤖 AI-validated</text>
+  <rect x="540" y="131" width="130" height="28" rx="14" fill="#1E3A5F" stroke="#34D399" stroke-width="1"/>
+  <text x="605" y="150" font-family="Arial, sans-serif" font-size="12" fill="#34D399" text-anchor="middle">📍 Hyperlocal pricing</text>
+  <!-- hackathon badge -->
+  <rect x="700" y="55" width="170" height="104" rx="8" fill="#0F2647" stroke="#1E4A8A" stroke-width="1"/>
+  <text x="785" y="90" font-family="Arial, sans-serif" font-size="11" fill="#64748B" text-anchor="middle">DEVTrails 2026</text>
+  <text x="785" y="110" font-family="Georgia, serif" font-size="13" fill="#93C5FD" text-anchor="middle" font-weight="700">Guidewire</text>
+  <text x="785" y="128" font-family="Georgia, serif" font-size="13" fill="#93C5FD" text-anchor="middle" font-weight="700">University</text>
+  <text x="785" y="146" font-family="Georgia, serif" font-size="13" fill="#93C5FD" text-anchor="middle" font-weight="700">Hackathon</text>
+</svg>

@@ -1,0 +1,89 @@
+<svg width="900" height="280" viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg">
+  <!-- RAVI card -->
+  <rect x="10" y="10" width="270" height="260" rx="12" fill="#F8FAFF" stroke="#BFDBFE" stroke-width="1.5"/>
+  <rect x="10" y="10" width="270" height="52" rx="12" fill="#1D4ED8"/>
+  <rect x="10" y="50" width="270" height="12" fill="#1D4ED8"/>
+  <!-- avatar circle -->
+  <circle cx="55" cy="36" r="18" fill="#DBEAFE"/>
+  <text x="55" y="43" font-family="Arial" font-size="18" text-anchor="middle">🧑</text>
+  <text x="145" y="30" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="white" text-anchor="middle">RAVI, 28</text>
+  <text x="145" y="48" font-family="Arial, sans-serif" font-size="11" fill="#BFDBFE" text-anchor="middle">Swiggy Rider · Bengaluru</text>
+
+  <text x="30" y="88" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Tenure</text>
+  <text x="250" y="88" font-family="Arial, sans-serif" font-size="11" fill="#1D4ED8" text-anchor="end" font-weight="700">14 months</text>
+  <line x1="30" y1="94" x2="250" y2="94" stroke="#E2E8F0" stroke-width="1"/>
+
+  <text x="30" y="112" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Avg weekly income</text>
+  <text x="250" y="112" font-family="Arial, sans-serif" font-size="11" fill="#1D4ED8" text-anchor="end" font-weight="700">₹4,200</text>
+  <line x1="30" y1="118" x2="250" y2="118" stroke="#E2E8F0" stroke-width="1"/>
+
+  <text x="30" y="136" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Lost last monsoon</text>
+  <text x="250" y="136" font-family="Arial, sans-serif" font-size="11" fill="#EF4444" text-anchor="end" font-weight="700">3 days, ₹1,200</text>
+
+  <rect x="20" y="152" width="250" height="42" rx="6" fill="#EFF6FF"/>
+  <text x="145" y="169" font-family="Georgia, serif" font-size="12" fill="#1E40AF" text-anchor="middle" font-style="italic">"Lost 3 days last August.</text>
+  <text x="145" y="185" font-family="Georgia, serif" font-size="12" fill="#1E40AF" text-anchor="middle" font-style="italic">No one paid me back."</text>
+
+  <rect x="20" y="204" width="250" height="22" rx="4" fill="#DBEAFE"/>
+  <text x="145" y="219" font-family="Arial, sans-serif" font-size="11" fill="#1D4ED8" text-anchor="middle" font-weight="700">Scenario: Legitimate flood claim</text>
+  <rect x="20" y="232" width="250" height="28" rx="4" fill="#16A34A"/>
+  <text x="145" y="250" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" font-weight="700">✓ Full payout ₹2,940 in &lt;2hrs</text>
+
+  <!-- PRIYA card -->
+  <rect x="315" y="10" width="270" height="260" rx="12" fill="#F8FFF9" stroke="#BBF7D0" stroke-width="1.5"/>
+  <rect x="315" y="10" width="270" height="52" rx="12" fill="#15803D"/>
+  <rect x="315" y="50" width="270" height="12" fill="#15803D"/>
+  <circle cx="360" cy="36" r="18" fill="#DCFCE7"/>
+  <text x="360" y="43" font-family="Arial" font-size="18" text-anchor="middle">👩</text>
+  <text x="450" y="30" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="white" text-anchor="middle">PRIYA, 24</text>
+  <text x="450" y="48" font-family="Arial, sans-serif" font-size="11" fill="#BBF7D0" text-anchor="middle">Zomato Rider · Pune</text>
+
+  <text x="335" y="88" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Tenure</text>
+  <text x="555" y="88" font-family="Arial, sans-serif" font-size="11" fill="#15803D" text-anchor="end" font-weight="700">2 weeks only</text>
+  <line x1="335" y1="94" x2="555" y2="94" stroke="#E2E8F0" stroke-width="1"/>
+
+  <text x="335" y="112" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Avg weekly income</text>
+  <text x="555" y="112" font-family="Arial, sans-serif" font-size="11" fill="#15803D" text-anchor="end" font-weight="700">₹2,800</text>
+  <line x1="335" y1="118" x2="555" y2="118" stroke="#E2E8F0" stroke-width="1"/>
+
+  <text x="335" y="136" font-family="Arial, sans-serif" font-size="11" fill="#64748B">History available</text>
+  <text x="555" y="136" font-family="Arial, sans-serif" font-size="11" fill="#F59E0B" text-anchor="end" font-weight="700">Very limited</text>
+
+  <rect x="325" y="152" width="250" height="42" rx="6" fill="#F0FDF4"/>
+  <text x="450" y="169" font-family="Georgia, serif" font-size="12" fill="#166534" text-anchor="middle" font-style="italic">"I just started.</text>
+  <text x="450" y="185" font-family="Georgia, serif" font-size="12" fill="#166534" text-anchor="middle" font-style="italic">I don't have history yet."</text>
+
+  <rect x="325" y="204" width="250" height="22" rx="4" fill="#DCFCE7"/>
+  <text x="450" y="219" font-family="Arial, sans-serif" font-size="11" fill="#15803D" text-anchor="middle" font-weight="700">Scenario: Cold start — new worker</text>
+  <rect x="325" y="232" width="250" height="28" rx="4" fill="#15803D"/>
+  <text x="450" y="250" font-family="Arial, sans-serif" font-size="11" fill="white" text-anchor="middle" font-weight="700">✓ Peer avg used · No penalties applied</text>
+
+  <!-- SURESH card -->
+  <rect x="620" y="10" width="270" height="260" rx="12" fill="#FFFBF5" stroke="#FED7AA" stroke-width="1.5"/>
+  <rect x="620" y="10" width="270" height="52" rx="12" fill="#B45309"/>
+  <rect x="620" y="50" width="270" height="12" fill="#B45309"/>
+  <circle cx="665" cy="36" r="18" fill="#FEF3C7"/>
+  <text x="665" y="43" font-family="Arial" font-size="18" text-anchor="middle">🧑</text>
+  <text x="755" y="30" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="white" text-anchor="middle">SURESH, 31</text>
+  <text x="755" y="48" font-family="Arial, sans-serif" font-size="11" fill="#FDE68A" text-anchor="middle">Amazon Partner · Hyderabad</text>
+
+  <text x="640" y="88" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Tenure</text>
+  <text x="860" y="88" font-family="Arial, sans-serif" font-size="11" fill="#B45309" text-anchor="end" font-weight="700">8 months</text>
+  <line x1="640" y1="94" x2="860" y2="94" stroke="#E2E8F0" stroke-width="1"/>
+
+  <text x="640" y="112" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Avg weekly income</text>
+  <text x="860" y="112" font-family="Arial, sans-serif" font-size="11" fill="#B45309" text-anchor="end" font-weight="700">₹3,600</text>
+  <line x1="640" y1="118" x2="860" y2="118" stroke="#E2E8F0" stroke-width="1"/>
+
+  <text x="640" y="136" font-family="Arial, sans-serif" font-size="11" fill="#64748B">Detected pattern</text>
+  <text x="860" y="136" font-family="Arial, sans-serif" font-size="11" fill="#EF4444" text-anchor="end" font-weight="700">Online, declining orders</text>
+
+  <rect x="630" y="152" width="250" height="42" rx="6" fill="#FFFBEB"/>
+  <text x="755" y="169" font-family="Georgia, serif" font-size="12" fill="#92400E" text-anchor="middle" font-style="italic">"Online but avoiding real</text>
+  <text x="755" y="185" font-family="Georgia, serif" font-size="12" fill="#92400E" text-anchor="middle" font-style="italic">work during disruptions."</text>
+
+  <rect x="630" y="204" width="250" height="22" rx="4" fill="#FEF3C7"/>
+  <text x="755" y="219" font-family="Arial, sans-serif" font-size="11" fill="#92400E" text-anchor="middle" font-weight="700">Scenario: Effort simulation detected</text>
+  <rect x="630" y="232" width="250" height="28" rx="4" fill="#D97706"/>
+  <text x="755" y="250" font-family="Arial, sans-serif" font-size="11" fill="white" text-anchor="middle" font-weight="700">⚠ Payout scaled down · Not rejected</text>
+</svg>

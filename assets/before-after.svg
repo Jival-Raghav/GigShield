@@ -1,0 +1,54 @@
+<svg width="900" height="320" viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="redgrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FEE2E2"/>
+      <stop offset="100%" style="stop-color:#FEF2F2"/>
+    </linearGradient>
+    <linearGradient id="greengrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#DCFCE7"/>
+      <stop offset="100%" style="stop-color:#F0FDF4"/>
+    </linearGradient>
+  </defs>
+  <!-- left panel - today -->
+  <rect x="20" y="10" width="400" height="300" rx="12" fill="url(#redgrad)" stroke="#FECACA" stroke-width="1.5"/>
+  <rect x="20" y="10" width="400" height="44" rx="12" fill="#EF4444"/>
+  <rect x="20" y="42" width="400" height="12" fill="#EF4444"/>
+  <text x="220" y="38" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="white" text-anchor="middle">❌  TODAY</text>
+
+  <!-- steps left -->
+  <text x="220" y="82" font-family="Arial, sans-serif" font-size="13" fill="#7F1D1D" text-anchor="middle">Flood hits worker's zone</text>
+  <text x="220" y="100" font-family="Arial, sans-serif" font-size="18" fill="#EF4444" text-anchor="middle">↓</text>
+  <text x="220" y="122" font-family="Arial, sans-serif" font-size="13" fill="#7F1D1D" text-anchor="middle">Worker loses ₹800 of daily income</text>
+  <text x="220" y="140" font-family="Arial, sans-serif" font-size="18" fill="#EF4444" text-anchor="middle">↓</text>
+  <text x="220" y="162" font-family="Arial, sans-serif" font-size="13" fill="#7F1D1D" text-anchor="middle">Files claim manually — photos, forms</text>
+  <text x="220" y="180" font-family="Arial, sans-serif" font-size="18" fill="#EF4444" text-anchor="middle">↓</text>
+  <text x="220" y="202" font-family="Arial, sans-serif" font-size="13" fill="#7F1D1D" text-anchor="middle">Waits 2–3 weeks for review</text>
+  <text x="220" y="220" font-family="Arial, sans-serif" font-size="18" fill="#EF4444" text-anchor="middle">↓</text>
+  <text x="220" y="242" font-family="Arial, sans-serif" font-size="13" fill="#7F1D1D" text-anchor="middle">Claim rejected — "insufficient proof"</text>
+  <text x="220" y="260" font-family="Arial, sans-serif" font-size="18" fill="#EF4444" text-anchor="middle">↓</text>
+  <rect x="90" y="270" width="260" height="30" rx="6" fill="#EF4444"/>
+  <text x="220" y="290" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="white" text-anchor="middle">Worker earns ₹0. Zero protection.</text>
+
+  <!-- VS badge -->
+  <circle cx="450" cy="160" r="26" fill="#1F2937" stroke="#374151" stroke-width="2"/>
+  <text x="450" y="166" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="white" text-anchor="middle">VS</text>
+
+  <!-- right panel - gigshield -->
+  <rect x="480" y="10" width="400" height="300" rx="12" fill="url(#greengrad)" stroke="#BBF7D0" stroke-width="1.5"/>
+  <rect x="480" y="10" width="400" height="44" rx="12" fill="#16A34A"/>
+  <rect x="480" y="42" width="400" height="12" fill="#16A34A"/>
+  <text x="680" y="38" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="white" text-anchor="middle">✅  WITH GIGSHIELD</text>
+
+  <text x="680" y="82" font-family="Arial, sans-serif" font-size="13" fill="#14532D" text-anchor="middle">Flood hits worker's zone</text>
+  <text x="680" y="100" font-family="Arial, sans-serif" font-size="18" fill="#16A34A" text-anchor="middle">↓</text>
+  <text x="680" y="122" font-family="Arial, sans-serif" font-size="13" fill="#14532D" text-anchor="middle">Signal auto-detected via IMD + NDMA APIs</text>
+  <text x="680" y="140" font-family="Arial, sans-serif" font-size="18" fill="#16A34A" text-anchor="middle">↓</text>
+  <text x="680" y="162" font-family="Arial, sans-serif" font-size="13" fill="#14532D" text-anchor="middle">Worker behaviour validated against peers</text>
+  <text x="680" y="180" font-family="Arial, sans-serif" font-size="18" fill="#16A34A" text-anchor="middle">↓</text>
+  <text x="680" y="202" font-family="Arial, sans-serif" font-size="13" fill="#14532D" text-anchor="middle">Proportional payout calculated (BAF score)</text>
+  <text x="680" y="220" font-family="Arial, sans-serif" font-size="18" fill="#16A34A" text-anchor="middle">↓</text>
+  <text x="680" y="242" font-family="Arial, sans-serif" font-size="13" fill="#14532D" text-anchor="middle">No forms. No waiting. No rejection.</text>
+  <text x="680" y="260" font-family="Arial, sans-serif" font-size="18" fill="#16A34A" text-anchor="middle">↓</text>
+  <rect x="550" y="270" width="260" height="30" rx="6" fill="#16A34A"/>
+  <text x="680" y="290" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="white" text-anchor="middle">₹2,940 transferred in &lt; 2 hours. ✓</text>
+</svg>

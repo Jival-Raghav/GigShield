@@ -1,0 +1,110 @@
+<svg width="900" height="780" viewBox="0 0 900 780" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="780" fill="#F8FAFC" rx="12"/>
+  <rect x="1" y="1" width="898" height="778" rx="12" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="450" y="28" font-family="Georgia, serif" font-size="15" font-weight="700" fill="#1E293B" text-anchor="middle">Claim Validation — Activity Diagram</text>
+  <line x1="200" y1="36" x2="700" y2="36" stroke="#E2E8F0" stroke-width="1"/>
+
+  <defs>
+    <marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#EF4444"/>
+    </marker>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#16A34A"/>
+    </marker>
+  </defs>
+
+  <!-- Start node -->
+  <circle cx="450" cy="60" r="14" fill="#1E293B"/>
+  <line x1="450" y1="74" x2="450" y2="98" stroke="#475569" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- Step 1 -->
+  <rect x="290" y="100" width="320" height="36" rx="18" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="450" y="123" font-family="Arial, sans-serif" font-size="12" fill="#1E3A8A" text-anchor="middle">External disruption signal detected</text>
+  <line x1="450" y1="136" x2="450" y2="158" stroke="#475569" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- Gate 1 diamond -->
+  <polygon points="450,160 530,190 450,220 370,190" fill="#FEF3C7" stroke="#D97706" stroke-width="1.5"/>
+  <text x="450" y="186" font-family="Arial, sans-serif" font-size="11" fill="#78350F" text-anchor="middle">GATE 1</text>
+  <text x="450" y="200" font-family="Arial, sans-serif" font-size="10" fill="#78350F" text-anchor="middle">Hard disqualify?</text>
+
+  <!-- Gate 1 - fail left -->
+  <line x1="370" y1="190" x2="200" y2="190" stroke="#EF4444" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="285" y="183" font-family="Arial, sans-serif" font-size="10" fill="#EF4444" text-anchor="middle">YES</text>
+  <rect x="100" y="174" width="100" height="32" rx="6" fill="#FEE2E2" stroke="#EF4444" stroke-width="1.2"/>
+  <text x="150" y="194" font-family="Arial, sans-serif" font-size="11" fill="#991B1B" text-anchor="middle">Reject claim</text>
+
+  <!-- Gate 1 - pass down -->
+  <line x1="450" y1="220" x2="450" y2="248" stroke="#16A34A" stroke-width="1.5" marker-end="url(#ag)"/>
+  <text x="462" y="238" font-family="Arial, sans-serif" font-size="10" fill="#16A34A">NO</text>
+
+  <!-- Validation layers box -->
+  <rect x="240" y="250" width="420" height="130" rx="8" fill="#F0FDF4" stroke="#16A34A" stroke-width="1.5"/>
+  <text x="450" y="272" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#14532D" text-anchor="middle">Unified Validation Pipeline</text>
+  <rect x="260" y="280" width="165" height="22" rx="4" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1"/>
+  <text x="343" y="295" font-family="Arial, sans-serif" font-size="10" fill="#15803D" text-anchor="middle">Layer 1: Signal Validation</text>
+  <rect x="440" y="280" width="200" height="22" rx="4" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1"/>
+  <text x="540" y="295" font-family="Arial, sans-serif" font-size="10" fill="#15803D" text-anchor="middle">Layer 2: Worker Location (GPS)</text>
+  <rect x="260" y="312" width="165" height="22" rx="4" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1"/>
+  <text x="343" y="327" font-family="Arial, sans-serif" font-size="10" fill="#15803D" text-anchor="middle">Layer 3: Peer Comparison</text>
+  <rect x="440" y="312" width="200" height="22" rx="4" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1"/>
+  <text x="540" y="327" font-family="Arial, sans-serif" font-size="10" fill="#15803D" text-anchor="middle">Layer 4: Temporal Consistency</text>
+  <rect x="310" y="346" width="280" height="22" rx="4" fill="#BBF7D0" stroke="#4ADE80" stroke-width="1"/>
+  <text x="450" y="361" font-family="Arial, sans-serif" font-size="10" fill="#14532D" text-anchor="middle">+ GPS Probabilistic Matching</text>
+
+  <line x1="450" y1="380" x2="450" y2="408" stroke="#475569" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- Catastrophic diamond -->
+  <polygon points="450,410 540,440 450,470 360,440" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="450" y="436" font-family="Arial, sans-serif" font-size="11" fill="#4C1D95" text-anchor="middle">Catastrophic?</text>
+  <text x="450" y="450" font-family="Arial, sans-serif" font-size="10" fill="#4C1D95" text-anchor="middle">severity &gt; 0.9</text>
+
+  <!-- Catastrophic YES - right -->
+  <line x1="540" y1="440" x2="680" y2="440" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="608" y="433" font-family="Arial, sans-serif" font-size="10" fill="#7C3AED" text-anchor="middle">YES</text>
+  <rect x="680" y="424" width="170" height="32" rx="6" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="765" y="438" font-family="Arial, sans-serif" font-size="10" fill="#4C1D95" text-anchor="middle">Signal-dominant BAF</text>
+  <text x="765" y="450" font-family="Arial, sans-serif" font-size="10" fill="#4C1D95" text-anchor="middle">enforce BAF ≥ 0.70</text>
+  <line x1="765" y1="456" x2="765" y2="510" stroke="#7C3AED" stroke-width="1.5"/>
+  <line x1="765" y1="510" x2="520" y2="510" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- Catastrophic NO - down -->
+  <line x1="450" y1="470" x2="450" y2="498" stroke="#475569" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="462" y="488" font-family="Arial, sans-serif" font-size="10" fill="#475569">NO</text>
+
+  <!-- BAF computation -->
+  <rect x="290" y="500" width="320" height="36" rx="8" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="450" y="519" font-family="Arial, sans-serif" font-size="12" fill="#1E3A8A" text-anchor="middle">Compute BAF</text>
+  <text x="450" y="532" font-family="Arial, sans-serif" font-size="10" fill="#2563EB" text-anchor="middle">0.4×peer + 0.35×activity + 0.25×temporal</text>
+  <line x1="450" y1="536" x2="450" y2="558" stroke="#475569" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- Repeated gaming diamond -->
+  <polygon points="450,560 550,590 450,620 350,590" fill="#FEF3C7" stroke="#D97706" stroke-width="1.5"/>
+  <text x="450" y="586" font-family="Arial, sans-serif" font-size="11" fill="#78350F" text-anchor="middle">Repeated gaming</text>
+  <text x="450" y="600" font-family="Arial, sans-serif" font-size="10" fill="#78350F" text-anchor="middle">detected?</text>
+
+  <!-- Gaming YES -->
+  <line x1="350" y1="590" x2="200" y2="590" stroke="#EF4444" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="275" y="583" font-family="Arial, sans-serif" font-size="10" fill="#EF4444" text-anchor="middle">YES</text>
+  <rect x="80" y="574" width="120" height="32" rx="6" fill="#FEE2E2" stroke="#EF4444" stroke-width="1.2"/>
+  <text x="140" y="588" font-family="Arial, sans-serif" font-size="10" fill="#991B1B" text-anchor="middle">Apply strategic</text>
+  <text x="140" y="600" font-family="Arial, sans-serif" font-size="10" fill="#991B1B" text-anchor="middle">penalty ×0.6</text>
+  <line x1="200" y1="590" x2="450" y2="625" stroke="#EF4444" stroke-width="1" stroke-dasharray="4,2"/>
+
+  <!-- Gaming NO -->
+  <line x1="450" y1="620" x2="450" y2="648" stroke="#16A34A" stroke-width="1.5" marker-end="url(#ag)"/>
+  <text x="462" y="638" font-family="Arial, sans-serif" font-size="10" fill="#16A34A">NO</text>
+
+  <!-- Payout calc -->
+  <rect x="270" y="650" width="360" height="36" rx="8" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.5"/>
+  <text x="450" y="669" font-family="Arial, sans-serif" font-size="12" fill="#14532D" text-anchor="middle">Calculate payout</text>
+  <text x="450" y="682" font-family="Arial, sans-serif" font-size="10" fill="#15803D" text-anchor="middle">income_lost × coverage_ratio × final_BAF</text>
+  <line x1="450" y1="686" x2="450" y2="708" stroke="#475569" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- End node -->
+  <circle cx="450" cy="720" r="14" fill="#16A34A"/>
+  <circle cx="450" cy="720" r="10" fill="white"/>
+  <text x="450" y="750" font-family="Arial, sans-serif" font-size="11" fill="#14532D" text-anchor="middle">Trust updated · Audit log written · Payment released</text>
+</svg>
