@@ -65,7 +65,7 @@ The convergence of a growing gig workforce, increasing climate volatility, real-
 
 ---
 
-## ⚙️ How GigShield Works
+## 👤 How GigShield Works
 
 <img src="assets/system-pipeline.svg" alt="GigShield 4-module pipeline" width="100%"/>
 
