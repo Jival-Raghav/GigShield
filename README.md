@@ -74,15 +74,11 @@ The convergence of a growing gig workforce, increasing climate volatility, real-
 
 We look at your recent earnings, remove any days where disruptions already happened, and reconstruct what a genuinely normal week looks like for you. New workers are compared to similar riders in their zone until they build enough personal history. This becomes your counterfactual income — the anchor for every payout calculation downstream.
 
-→ [See baseline estimation implementation details](#part-1--baseline-income-estimation)
-
 ---
 
 **🟣 Part 2 — Risk Modelling: How bad could this week get?**
 
 Every Monday, we pull weather forecasts, AQI data, flood alerts, and local event calendars for your specific delivery zone. A machine learning model trained on years of historical disruptions predicts how many days are likely to be disrupted and how severe each one will be. High-data zones are ML-driven; new zones lean on historical risk patterns.
-
-→ [See risk modelling implementation details](#part-2--disruption-risk-modelling)
 
 ---
 
@@ -90,15 +86,15 @@ Every Monday, we pull weather forecasts, AQI data, flood alerts, and local event
 
 Your weekly premium is calculated from your expected income loss for that week, adjusted for your zone's risk level and platform. Workers with a strong trust history get a small discount. We build in actuarial margins to keep the platform solvent even during bad monsoon seasons — and zone-level community pricing prevents adverse selection spirals.
 
-→ [See premium pricing implementation details](#part-3--dynamic-premium-pricing)
-
 ---
 
 **🔴 Part 4 — Validation & Payout: Was the claim real?**
 
 When disruption hits, we don't just ask "did it happen?" — we ask "how much did it affect this specific worker?" We check GPS location, activity levels compared to peers in the same zone, and historical behaviour patterns. Instead of rejecting ambiguous claims, we scale payouts proportionally. Honest workers get full payouts. Suspicious patterns reduce the payout gradually — with repeated gaming penalised more firmly over time.
 
-→ [See validation and payout implementation details](#part-4--validation-payout--trust)
+<div align="center">
+<h4><a href="#part-1--baseline-income-estimation">📐 Full technical specification available in the Implementation Detail section below</a></h4>
+</div>
 
 ---
 
