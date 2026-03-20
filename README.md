@@ -22,8 +22,9 @@
 - [Tech Stack & Development Plan](#️-tech-stack--development-plan)
 - [2-Minute Video](#-2-minute-video)
 
-### 🛡️ Adversarial Defense & Anti-Spoofing
-- [How We Handle GPS Spoofing & Coordinated Fraud Rings](#️-dversarial-defense--anti-spoofing-strategy)
+### Adversarial Defense & Anti-Spoofing
+- [How We Handle GPS Spoofing & Coordinated Fraud Rings](#adversarial-defense-and-anti-spoofing-strategy)
+
 
 ### 🔬 Implementation Detail *(technical depth)*
 - [Part 1 · Baseline Income Estimation](#part-1--baseline-income-estimation)
@@ -240,7 +241,7 @@ Delivery workers switch phones frequently and app store installations create fri
 
 ---
 
-# 👤 Adversarial Defense & Anti-Spoofing Strategy
+# Adversarial Defense and Anti-Spoofing Strategy
 
 > *A coordinated syndicate of 500 workers using GPS-spoofing apps to fake flood-zone locations and drain the liquidity pool is not a hypothetical — it is a documented attack vector. GigShield was already designed around the assumption that no single signal is trustworthy. Here is exactly how our architecture handles it.*
 
