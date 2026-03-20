@@ -1,0 +1,96 @@
+<svg width="900" height="520" viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="520" fill="#F8FAFC" rx="12"/>
+  <rect x="1" y="1" width="898" height="518" rx="12" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="450" y="28" font-family="Georgia, serif" font-size="15" font-weight="700" fill="#1E293B" text-anchor="middle">Flood → ₹2,940 Paid in &lt;2 Hours — Sequence Diagram</text>
+  <line x1="150" y1="36" x2="750" y2="36" stroke="#E2E8F0" stroke-width="1"/>
+
+  <defs>
+    <marker id="sa" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="sg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#16A34A"/>
+    </marker>
+    <marker id="sb" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#2563EB"/>
+    </marker>
+  </defs>
+
+  <!-- Actor lifeline headers -->
+  <!-- External APIs -->
+  <rect x="30" y="48" width="110" height="40" rx="6" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="85" y="65" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#4C1D95" text-anchor="middle">External APIs</text>
+  <text x="85" y="80" font-family="Arial, sans-serif" font-size="9" fill="#5B21B6" text-anchor="middle">IMD · CPCB · NDMA</text>
+  <line x1="85" y1="88" x2="85" y2="500" stroke="#7C3AED" stroke-width="1" stroke-dasharray="5,3"/>
+
+  <!-- GigShield System -->
+  <rect x="220" y="48" width="130" height="40" rx="6" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="285" y="65" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#1E3A8A" text-anchor="middle">GigShield</text>
+  <text x="285" y="80" font-family="Arial, sans-serif" font-size="9" fill="#1D4ED8" text-anchor="middle">Validation Engine</text>
+  <line x1="285" y1="88" x2="285" y2="500" stroke="#2563EB" stroke-width="1" stroke-dasharray="5,3"/>
+
+  <!-- Payment Gateway -->
+  <rect x="520" y="48" width="120" height="40" rx="6" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.5"/>
+  <text x="580" y="65" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#14532D" text-anchor="middle">Payment GW</text>
+  <text x="580" y="80" font-family="Arial, sans-serif" font-size="9" fill="#15803D" text-anchor="middle">Razorpay / UPI</text>
+  <line x1="580" y1="88" x2="580" y2="500" stroke="#16A34A" stroke-width="1" stroke-dasharray="5,3"/>
+
+  <!-- Worker -->
+  <rect x="730" y="48" width="130" height="40" rx="6" fill="#FEF3C7" stroke="#D97706" stroke-width="1.5"/>
+  <text x="795" y="65" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#78350F" text-anchor="middle">Worker (Ravi)</text>
+  <text x="795" y="80" font-family="Arial, sans-serif" font-size="9" fill="#92400E" text-anchor="middle">Swiggy · Bengaluru</text>
+  <line x1="795" y1="88" x2="795" y2="500" stroke="#D97706" stroke-width="1" stroke-dasharray="5,3"/>
+
+  <!-- Message 1: APIs → System -->
+  <line x1="85" y1="120" x2="275" y2="120" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#sa)"/>
+  <text x="185" y="113" font-family="Arial, sans-serif" font-size="10" fill="#4C1D95" text-anchor="middle">Flood alert: zone BLR-004</text>
+  <rect x="30" y="110" width="10" height="20" rx="2" fill="#7C3AED" opacity="0.4"/>
+  <rect x="280" y="110" width="10" height="20" rx="2" fill="#2563EB" opacity="0.4"/>
+
+  <!-- Message 2: System → APIs (confirm) -->
+  <line x1="285" y1="155" x2="95" y2="155" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="5,2" marker-end="url(#sb)"/>
+  <text x="185" y="148" font-family="Arial, sans-serif" font-size="10" fill="#1D4ED8" text-anchor="middle">Cross-check IMD + CPCB signal</text>
+  <rect x="280" y="145" width="10" height="20" rx="2" fill="#2563EB" opacity="0.4"/>
+
+  <!-- Message 3: APIs → System (confirmed) -->
+  <line x1="85" y1="185" x2="275" y2="185" stroke="#16A34A" stroke-width="1.5" marker-end="url(#sa)"/>
+  <text x="185" y="178" font-family="Arial, sans-serif" font-size="10" fill="#15803D" text-anchor="middle">Signal confirmed ✓</text>
+
+  <!-- System self-loop: run validation -->
+  <rect x="280" y="202" width="10" height="60" rx="2" fill="#2563EB" opacity="0.4"/>
+  <path d="M290,210 Q340,210 340,232 Q340,254 290,254" fill="none" stroke="#2563EB" stroke-width="1.5" marker-end="url(#sb)"/>
+  <text x="365" y="228" font-family="Arial, sans-serif" font-size="10" fill="#1D4ED8">Run validation pipeline</text>
+  <text x="365" y="240" font-family="Arial, sans-serif" font-size="10" fill="#1D4ED8">Layers 1–4 · GPS check</text>
+
+  <!-- System self: compute BAF -->
+  <rect x="280" y="275" width="10" height="50" rx="2" fill="#2563EB" opacity="0.4"/>
+  <path d="M290,283 Q340,283 340,300 Q340,317 290,317" fill="none" stroke="#2563EB" stroke-width="1.5" marker-end="url(#sb)"/>
+  <text x="365" y="297" font-family="Arial, sans-serif" font-size="10" fill="#1D4ED8">Compute BAF = 0.87</text>
+  <text x="365" y="309" font-family="Arial, sans-serif" font-size="10" fill="#1D4ED8">Payout = ₹2,940</text>
+
+  <!-- System self: check audit -->
+  <path d="M290,335 Q340,335 340,348 Q340,361 290,361" fill="none" stroke="#2563EB" stroke-width="1.5" marker-end="url(#sb)"/>
+  <text x="365" y="352" font-family="Arial, sans-serif" font-size="10" fill="#1D4ED8">Audit triggers → none fired ✓</text>
+
+  <!-- System → Payment GW -->
+  <line x1="295" y1="385" x2="570" y2="385" stroke="#16A34A" stroke-width="1.5" marker-end="url(#sg)"/>
+  <text x="432" y="378" font-family="Arial, sans-serif" font-size="10" fill="#15803D" text-anchor="middle">Initiate UPI transfer ₹2,940 → Ravi</text>
+  <rect x="575" y="375" width="10" height="20" rx="2" fill="#16A34A" opacity="0.4"/>
+
+  <!-- Payment GW → Worker -->
+  <line x1="590" y1="415" x2="785" y2="415" stroke="#16A34A" stroke-width="1.5" marker-end="url(#sg)"/>
+  <text x="688" y="408" font-family="Arial, sans-serif" font-size="10" fill="#15803D" text-anchor="middle">₹2,940 received (UPI) ✓</text>
+  <rect x="790" y="405" width="10" height="20" rx="2" fill="#D97706" opacity="0.4"/>
+
+  <!-- System → Worker (notification) -->
+  <line x1="295" y1="445" x2="785" y2="445" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5,2" marker-end="url(#sa)"/>
+  <text x="540" y="438" font-family="Arial, sans-serif" font-size="10" fill="#92400E" text-anchor="middle">Notification: GigShield paid ₹2,940 for flood disruption</text>
+
+  <!-- System self: trust update -->
+  <path d="M290,462 Q340,462 340,473 Q340,484 290,484" fill="none" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#sa)"/>
+  <text x="365" y="477" font-family="Arial, sans-serif" font-size="10" fill="#475569">Trust score 0.74 → 0.76 · Async audit log written</text>
+
+  <!-- Time annotation -->
+  <rect x="30" y="115" width="5" height="355" rx="2" fill="#E2E8F0" opacity="0.6"/>
+  <text x="22" y="300" font-family="Arial, sans-serif" font-size="10" fill="#94A3B8" text-anchor="middle" transform="rotate(-90 22 300)">time</text>
+</svg>
