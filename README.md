@@ -8,7 +8,7 @@
 
 ## 📋 Table of Contents
 
-**Story Layer** *(start here)*
+### 🚀 The GigShield Story *(start here)*
 - [The Problem](#-the-problem)
 - [Why Now](#-why-now)
 - [Meet the Workers](#-meet-the-workers)
@@ -19,10 +19,13 @@
 - [vs Existing Solutions](#-vs-existing-solutions)
 - [Parametric Triggers](#-parametric-triggers)
 - [Feasibility](#-feasibility)
-- [Tech Stack & Development Plan](#-tech-stack--development-plan)
+- [Tech Stack & Development Plan](#️-tech-stack--development-plan)
 - [2-Minute Video](#-2-minute-video)
 
-**Implementation Detail** *(technical depth)*
+### 🛡️ Adversarial Defense & Anti-Spoofing
+- [How We Handle GPS Spoofing & Coordinated Fraud Rings](#️-dversarial-defense--anti-spoofing-strategy)
+
+### 🔬 Implementation Detail *(technical depth)*
 - [Part 1 · Baseline Income Estimation](#part-1--baseline-income-estimation)
 - [Part 2 · Disruption Risk Modelling](#part-2--disruption-risk-modelling)
 - [Part 3 · Dynamic Premium Pricing](#part-3--dynamic-premium-pricing)
@@ -118,6 +121,7 @@ Three actor types interact with the system: **Workers** (register, pay premiums,
 | Claim Validation | Temporal consistency scoring | Sigmoid scoring function | Worker activity vs peer cluster behaviour |
 | Anti-Gaming | Detect effort simulation | Rule-based + acceptance rate signal | Order acceptance patterns, online hours vs deliveries |
 | Trust Scoring | Behavioural trust update | Asymmetric weighted moving average | BAF history, claim frequency, timing patterns |
+| Spoof Detection | Multi-signal cross-verification | Anomaly detection | Cell tower, accelerometer, IP, route history |
 
 ---
 
@@ -161,6 +165,7 @@ Good behaviour earns premium discounts. Gaming is penalised gradually across a 5
 | Personalisation | Low | Medium | ✅ **Hyperlocal + behavioural** |
 | New worker support | None | None | ✅ **Cold start + peer baseline** |
 | Gaming detection | None | Basic blacklisting | ✅ **Acceptance rate + trust scoring** |
+| GPS spoof detection | None | None | ✅ **7-signal cross-verification** |
 
 ---
 
@@ -181,10 +186,10 @@ Good behaviour earns premium discounts. Gaming is penalised gradually across a 5
 
 ## 🔧 Feasibility
 
-- All disruption signals (weather, AQI, flood alerts) are available via **free public APIs** — IMD, CPCB, NDMA, OpenWeatherMap
-- Income data sourced via **platform API integrations** or self-reported worker logs during onboarding
+- All disruption signals (weather, AQI, flood alerts) available via **free public APIs** — IMD, CPCB, NDMA, OpenWeatherMap
+- Income data sourced via **platform API integrations** or self-reported worker logs at onboarding
 - Risk models use **standard ML techniques** — XGBoost, Gradient Boosting, Logistic Regression — no unsolved research
-- Real-time claim validation is achievable using **event-driven architecture** with sub-second signal processing
+- Real-time claim validation achievable using **event-driven architecture** with sub-second signal processing
 - Instant payouts use **existing UPI rails** — India's payment infrastructure handles this at scale today
 
 | Data Need | Source | Availability |
@@ -192,9 +197,10 @@ Good behaviour earns premium discounts. Gaming is penalised gradually across a 5
 | Rainfall / weather | IMD API, OpenWeatherMap | Free / public |
 | AQI levels | CPCB real-time API | Free / public |
 | Flood alerts | NDMA, state government APIs | Free / public |
-| Worker income data | Platform API integration or self-reported | Partnership required |
-| GPS location | Device GPS | Worker consent |
+| Worker income data | Platform API or self-reported | Partnership required |
+| GPS + accelerometer | Device sensors via PWA | Worker consent |
 | Order acceptance rate | Platform API | Partnership required |
+| Cell tower data | Telecom API (Jio / Airtel) | Partnership required |
 
 > *This system is engineering-heavy but uses well-understood components — making it confidently realistic to build within a startup or insurer ecosystem.*
 
@@ -207,7 +213,7 @@ Good behaviour earns premium discounts. Gaming is penalised gradually across a 5
 | Layer | Technology | Purpose |
 |---|---|---|
 | Backend | Python / FastAPI | ML pipeline, API layer, validation engine |
-| ML Models | XGBoost, Random Forest, scikit-learn | Risk forecasting, baseline estimation |
+| ML Models | XGBoost, Random Forest, scikit-learn | Risk forecasting, baseline estimation, spoof detection |
 | Database | PostgreSQL + Redis | Claims, trust scores, real-time state |
 | External APIs | IMD, CPCB, NDMA, OpenWeatherMap | Disruption signal sources |
 | Payments | Razorpay / UPI | Mock in Phase 2, simulated live in Phase 3 |
@@ -216,29 +222,137 @@ Good behaviour earns premium discounts. Gaming is penalised gradually across a 5
 
 **Platform choice: Progressive Web App, not native mobile**
 
-Delivery workers switch phones frequently and app store installations create friction at onboarding. A PWA works on any Android browser, installs to the home screen in one tap, and supports low-connectivity zones via service workers — critical for workers in areas with poor signal during monsoon disruptions.
+Delivery workers switch phones frequently and app store installations create friction at onboarding. A PWA works on any Android browser, installs to the home screen in one tap, and supports low-connectivity zones via service workers.
 
 **Development Plan**
 
 | Phase | Dates | Theme | Deliverables |
 |---|---|---|---|
-| **Phase 1** | Mar 4 – Mar 20 | Know Your Worker | README, system HLD, personas, pipeline architecture, 2-min video |
-| **Phase 2** | Mar 21 – Apr 4 | Protect Your Worker | Worker registration + onboarding, insurance policy management, dynamic premium calculator, 3–5 parametric triggers via public APIs, claims management UI, 2-min demo video |
-| **Phase 3** | Apr 5 – Apr 17 | Perfect Your Worker | Advanced fraud detection (GPS spoofing, fake weather claims), simulated UPI instant payout (Razorpay test mode), worker dashboard (earnings protected, coverage status), insurer admin dashboard (loss ratios, next-week risk forecast), full BAF pipeline, 5-min demo video, pitch deck |
+| **Phase 1** | Mar 4 – Mar 20 | Know Your Worker | README, system HLD, personas, pipeline architecture, adversarial defense strategy, 2-min video |
+| **Phase 2** | Mar 21 – Apr 4 | Protect Your Worker | Worker registration, policy management, dynamic premium calculator, 3–5 parametric API triggers, claims management UI, 2-min demo video |
+| **Phase 3** | Apr 5 – Apr 17 | Perfect Your Worker | Advanced fraud detection (GPS spoofing + coordinated ring detection), simulated UPI instant payout, worker + insurer dashboards, full BAF pipeline, 5-min demo video, pitch deck |
 
 ---
 
 ## 🎥 2-Minute Video
 
-> *(Link to be added — covers: problem statement, GigShield solution walkthrough, and the automated claim pipeline in action)*
+[![Watch the video](https://img.shields.io/badge/▶%20Watch-2%20Minute%20Overview-red?style=for-the-badge)](https://drive.google.com/file/d/1bdd264cD7bH50AdBTwIY2AVyDyt4H0Um/view?usp=sharing)
 
-[![Watch the video](https://img.shields.io/badge/▶%20Watch-2%20Minute%20Overview-red?style=for-the-badge)](YOUR_VIDEO_LINK_HERE)
+---
+
+# 🛡️ Adversarial Defense & Anti-Spoofing Strategy
+
+> *A coordinated syndicate of 500 workers using GPS-spoofing apps to fake flood-zone locations and drain the liquidity pool is not a hypothetical — it is a documented attack vector. GigShield was already designed around the assumption that no single signal is trustworthy. Here is exactly how our architecture handles it.*
+
+---
+
+### ✅ What GigShield Already Covers — 60% neutralised by existing architecture
+
+| Existing Defense | How It Handles the Attack |
+|---|---|
+| **Historical peer anchor** | `peer_baseline = 0.5 × real_time + 0.5 × historical` — 500 workers suppressing real-time avg cannot move the blended baseline by more than 50% of their suppression magnitude. Liquidity drain is automatically halved. |
+| **Effort simulation detection** | Workers at home decline orders. `acceptance_rate_drop < 0.6 AND online_hours > peer_avg` fires immediately — activity score reduced 15%, flagged for audit. |
+| **Proportional BAF payout** | Even if spoofing partially passes validation, payout is scaled by BAF — not paid in full. A spoofed claim gets a fraction, not the maximum. Liquidity drain is bounded. |
+| **Asymmetric trust scoring** | Coordinated gaming across multiple claims triggers the 5-claim lookback penalty (×0.6 multiplier). Syndicate members degrade their own payout capacity over time. |
+| **Cluster size fallback** | If 500 workers simultaneously suppress a zone, cluster variance spikes — system flags the zone and falls back to historical baseline, not the manipulated real-time data. |
+
+---
+
+### ❌ The Remaining 40% — What Was Not Covered
+
+The core gap is **active GPS spoofing that produces a high-confidence fake signal.** Our existing GPS fallback hierarchy handles *weak or lost* signals — but a sophisticated spoofing app produces a signal that looks completely legitimate. Three specific gaps:
+
+- No cross-verification of GPS against non-spoofable signals
+- No coordinated ring detection across simultaneous claims
+- No behavioural fingerprinting of device state during the claim
+
+---
+
+### 🔧 How We Are Modifying to Cover It
+
+**New component: Multi-Signal Spoofing Detection Layer** — sits inside Layer 2 (Worker Validation) of the existing pipeline. No architectural changes required.
+
+<img src="assets/anti-spoofing-signals.svg" alt="7-signal spoofing detection diagram" width="100%"/>
+
+**1. The Differentiation — Genuine worker vs spoofer**
+
+A genuinely stranded delivery worker in a flood zone will show GPS location consistent with their active delivery route history, cell tower handoffs consistent with movement through the zone, accelerometer data showing outdoor mobility patterns, and network connectivity drops consistent with bad weather.
+
+A spoofing worker at home will show GPS location they have rarely or never visited, cell tower data placing them at a residential address, a stationary accelerometer with no route progression, and stable home WiFi throughout the claimed disruption.
+
+GigShield cross-checks all signals. A mismatch between GPS and any two or more other signals triggers a spoofing flag.
+
+---
+
+**2. The Data — Beyond GPS coordinates**
+
+| Signal | What It Detects | Spoofable? |
+|---|---|---|
+| **Cell tower triangulation** | Physical location independent of GPS | Very hard — requires telecom-level access |
+| **Accelerometer / motion data** | Stationary vs moving, indoor vs outdoor patterns | No — hardware device sensor |
+| **IP geolocation** | Home WiFi vs mobile data in claimed zone | Hard to fake simultaneously with GPS |
+| **Historical route consistency** | Has this worker ever been in this zone before? | No — based on our own stored data |
+| **Order acceptance behaviour** | Real workers attempt orders even in bad conditions | No — sourced from platform API |
+| **Claim timing correlation** | Are 50+ workers in the same zone filing within minutes? | No — system-level statistical detection |
+| **Device fingerprint** | Is a known GPS spoof app running in the background? | Hard — requires full app obfuscation |
+
+A genuine worker needs to match on 4 of 7. A spoofing worker will fail on cell tower, accelerometer, and IP simultaneously — three independent signals that cannot all be faked with consumer-grade spoofing tools.
+
+---
+
+**3. Coordinated Ring Detection**
+
+```
+syndicate_flag = TRUE if ANY of:
+
+  claims_filed_same_zone_per_hour > 3 × historical_avg
+
+  OR new_worker_claim_ratio_in_zone > 0.4
+     (syndicates recruit fresh accounts)
+
+  OR claim_filing_interval < 3 minutes
+     (Telegram-coordinated mass filing)
+
+  OR GPS_locations_cluster_within_200m
+     (everyone in the flood zone suspiciously close together)
+```
+
+When `syndicate_flag = TRUE`: zone enters elevated scrutiny mode, all new claims require cell tower cross-check before payout, payouts are **held not rejected**, insurer dashboard shows real-time zone alert.
+
+---
+
+**4. The UX Balance — Flagged does not mean Rejected**
+
+```
+spoofing_signals_fired = 0 or 1  →  Process normally, no flag
+
+spoofing_signals_fired = 2       →  Process with BAF × 0.85
+                                     Worker notified of verification
+                                     Async audit within 24 hours
+
+spoofing_signals_fired >= 3      →  Hold payout — do NOT reject
+                                     Worker notified: resolves in 2–4 hrs
+                                     Human review queue
+                                     Confirmed genuine → full payout
+                                     Confirmed spoof  → denied + trust hit
+```
+
+**Key principle: we hold, we do not reject.** A genuine worker in a real flood with a dropped signal gets their payout — just 2–4 hours later after verification.
+
+---
+
+### 🧠 Why This Architecture Is Robust
+
+The syndicate attack assumes GPS is the only location signal. GigShield treats GPS as one of seven. To successfully spoof GigShield, an attacker would need to simultaneously fake GPS coordinates, cell tower data, device accelerometer, IP geolocation, and order behaviour — across 500 devices — in a coordinated time window — without triggering the cluster detection algorithm.
+
+> *GigShield was already designed around the assumption that no single signal is trustworthy. This challenge confirms that was the right call.*
+
 
 ---
 
 ---
 
-# Implementation Detail
+# 🔬 Implementation Detail
 
 > *Everything above is the story. What follows is how we actually build it — the internal design of each module, the math behind the decisions, and the trade-offs we made consciously.*
 
@@ -247,8 +361,6 @@ Delivery workers switch phones frequently and app store installations create fri
 ## Part 1 — Baseline Income Estimation
 
 **Objective:** Estimate the counterfactual weekly income a worker would have earned if no disruptions had occurred. This is the financial anchor for all downstream payout calculations.
-
-**The core challenge:** Historical income data contains disrupted days. Averaging directly produces a downward-biased baseline. We reconstruct clean income by removing disrupted days and normalising for the composition of days removed.
 
 **How it works in plain English:**
 1. Label each historical day as disrupted or clean using external signals only
@@ -260,8 +372,6 @@ Delivery workers switch phones frequently and app store installations create fri
 <summary>📐 See full technical specification</summary>
 
 **Disruption Day Detection**
-
-Each calendar day is labelled using external signals only — never income data (prevents circular dependency):
 
 ```
 disruption_day = 1  (disrupted)  |  0  (clean)
@@ -285,7 +395,7 @@ day_weight[day] = learned from peer cluster historical
 
 **Availability Bias Fix**
 
-Worker availability schedules declared at onboarding constrain which days are reconstructed. Days the worker simply chose not to work are excluded from reconstruction — preventing overestimation for part-time workers.
+Worker availability schedules declared at onboarding constrain which days are reconstructed. Days the worker simply chose not to work are excluded — preventing overestimation for part-time workers.
 
 **Edge Cases**
 
@@ -306,13 +416,6 @@ worker_factor = avg(worker_income_last_8_weeks) /
 New workers (tenure < 8 weeks):
     baseline_income = peer_baseline × min(tenure_weeks / 8, 1.0)
 ```
-
-**Regression Model Features**
-
-- week_of_year, month, weekend_count_in_week
-- rolling_peer_income_last_4_weeks
-- festival_or_holiday_flag
-- zone_demand_index_last_2_weeks
 
 **Output**
 
@@ -341,11 +444,9 @@ New workers (tenure < 8 weeks):
 
 ```
 expected_loss = min(
-    baseline_income
-    × E(disruption_days)          ← expected days disrupted
-    × E(severity_per_day)         ← fraction of daily income lost
-    × coverage_ratio,
-    max_weekly_coverage            ← insurer viability cap
+    baseline_income × E(disruption_days)
+    × E(severity_per_day) × coverage_ratio,
+    max_weekly_coverage
 )
 
 E(disruption_days) = min(ML_predicted, expected_work_days)
@@ -359,7 +460,6 @@ Version B labels → risk model training (stricter — confirmed severe only)
 
 Severity reference = peer cluster avg income on clean days
                      NOT individually predicted baseline
-                     (further breaks the circular dependency)
 ```
 
 **Hybrid Risk Model**
@@ -369,12 +469,7 @@ P(disruption_next_week) =
     ML_prediction × α  +  historical_risk × (1 − α)
 
 α = calibrated on held-out validation set
-
-Historical risk: exponential decay weighting over years
-                 (recent data weighted higher — climate drift)
 ```
-
-**ML Features:** Rainfall forecast + intensity, consecutive rainy days, ground saturation proxy (7-day cumulative), AQI forecast, zone flood vulnerability score, road quality index, platform outage history, festival flags, monsoon phase, days since last disruption.
 
 **Severity Levels**
 
@@ -384,17 +479,6 @@ Historical risk: exponential decay weighting over years
 | Medium | Heavy rain + local flooding | ~50% |
 | High | Floods, curfew, full zone closure | ~90% |
 
-**Output**
-
-```json
-{
-  "E_disruption_days": 2.1,
-  "E_severity_per_day": 0.50,
-  "confidence": 0.80,
-  "risk_source": "hybrid"
-}
-```
-
 </details>
 
 ---
@@ -403,7 +487,7 @@ Historical risk: exponential decay weighting over years
 
 **Objective:** Translate expected loss into a weekly premium that is affordable, commercially sustainable, and dynamically adjusted for individual risk profile.
 
-**Plain English:** Your premium is recalculated every Monday. It's based on how much you're expected to lose that week, adjusted for your zone's risk and your own trust history. We build in margins to keep the platform solvent — and zone-level pricing prevents only high-risk workers from buying coverage.
+**Plain English:** Your premium is recalculated every Monday based on expected loss, zone risk, and your trust history. Zone-level pricing prevents only high-risk workers from buying coverage.
 
 <details>
 <summary>📐 See full technical specification</summary>
@@ -413,32 +497,13 @@ Historical risk: exponential decay weighting over years
 ```
 weekly_premium =
     (expected_loss / coverage_ratio)
-    × (1 + loading_factor)         ← 30–45% actuarial margin
-    × risk_multiplier              ← zone × platform (capped at 2.0×)
-    × trust_discount               ← 0.94–1.04 based on trust score
+    × (1 + loading_factor)
+    × risk_multiplier
+    × trust_discount
 
 target_loss_ratio = 60%–70%
-```
-
-**Loading Factor Breakdown**
-
-| Component | Contribution |
-|---|---|
-| Claims handling + operations | 8–10% |
-| Reinsurance cost | 10–12% |
-| Adverse selection buffer | 5–8% |
-| Profit margin | 5–10% |
-| **Total** | **28–40% (capped at 45%)** |
-
-**Adverse Selection Control**
-
-Zone-level community pricing: all workers in a micro-zone pay the same base premium. This prevents self-selection by individual risk awareness and breaks the adverse selection spiral.
-
-```
-risk_multiplier = min(
-    zone_risk_index × platform_volatility_index,
-    2.0    ← hard cap — affordability floor
-)
+loading_factor = 28–40% (capped at 45%)
+risk_multiplier = min(zone_risk × platform_volatility, 2.0)
 ```
 
 **Coverage Tiers**
@@ -454,10 +519,7 @@ risk_multiplier = min(
 ```
 trust_discount = 1 - (trust_score - 0.6) × 0.1
 
-trust_score 0.6 → no change (1.00×)
-trust_score 0.8 → 2% reduction (0.98×)
-trust_score 1.0 → 4% reduction (0.96×)
-trust_score 0.4 → 2% surcharge (1.02×)
+trust_score 0.8 → 2% reduction  |  trust_score 0.4 → 2% surcharge
 ```
 
 </details>
@@ -493,12 +555,9 @@ behavior_drop_ratio =
     max(activity_during_normal_periods, epsilon)
 
 epsilon = max(0.01, 0.1 × avg_activity_last_14_days)
-          ← adaptive: prevents inflated ratios for new workers
 
 temporal_consistency_score =
     clamp(1 / (1 + exp(−5 × (behavior_drop_ratio − 1))), 0, 1)
-
-Audit band stored: score > 0.7 → "high" | > 0.4 → "medium" | else → "low"
 ```
 
 **BAF Computation**
@@ -508,23 +567,7 @@ BAF_raw = 0.4 × peer_ratio
         + 0.35 × activity_score
         + 0.25 × temporal_consistency_score
 
-Dynamic floor:
-    trust_score > 0.8 → floor = 0.30
-    trust_score > 0.6 → floor = 0.25
-    trust_score > 0.4 → floor = 0.20
-    else              → floor = 0.10
-
-BAF = max(BAF_raw, floor)
-```
-
-**Peer Manipulation Defense**
-
-```
-peer_baseline = 0.5 × real_time_peer_avg
-              + 0.5 × historical_cluster_avg
-
-50/50 blend: coordinated suppression can only pull the baseline
-down by 50% of the suppression magnitude.
+Dynamic floor based on trust_score → BAF = max(BAF_raw, floor)
 ```
 
 **Strategic Behavior Penalty**
@@ -538,47 +581,6 @@ elif low_effort_count == 2 → penalty = 0.8
 else → penalty = 1.0
 
 final_BAF = BAF × penalty
-
-Detection uses INPUTS only — not BAF output.
-Circularity eliminated.
-```
-
-**Catastrophic Handling**
-
-```
-if severity > 0.9 AND multi-source confirmed:
-    BAF = 0.7 × signal_score
-        + 0.2 × temporal_score
-        + 0.1 × activity_score
-    enforce BAF ≥ 0.70
-```
-
-**Effort Simulation Detection**
-
-```
-acceptance_rate_drop =
-    order_acceptance_rate_during_disruption /
-    order_acceptance_rate_during_normal_periods
-
-if acceptance_rate_drop < 0.6 AND online_hours > peer_avg:
-    reduce activity_score by 15%
-    flag for audit
-
-Uses acceptance rate — NOT deliveries/hour.
-deliveries/hour is confounded by geography and platform allocation.
-```
-
-**Eligible Hours**
-
-```
-eligible_hours = min(
-    shift_overlap_hours,
-    rolling_avg_work_hours_last_14_days,
-    platform_max_shift_hours        ← configurable per platform
-)
-
-if shift_overlap > worker_90th_percentile_hours:
-    flag for audit — do NOT auto-cap
 ```
 
 **Payout Formula**
@@ -598,6 +600,7 @@ Flag for audit if ANY of:
   shift_overlap > worker_90th_percentile_hours
   acceptance_rate_drop < 0.6 AND online_hours > peer_avg
   claim_timing_flag = TRUE
+  spoofing_signals_fired >= 2
 ```
 
 **Trust Score Update**
@@ -606,10 +609,10 @@ Flag for audit if ANY of:
 Cold start (first 3 claims): trust = 0.6 fixed, no penalties
 
 After cold start:
-    if BAF < 0.4: weight = 0.35   ← punishes faster
-    else:         weight = 0.20   ← rewards slower
+    if BAF < 0.4: weight = 0.35   (punishes faster)
+    else:         weight = 0.20   (rewards slower)
 
-trust_new = (1 − weight) × trust_old + weight × BAF
+    trust_new = (1 − weight) × trust_old + weight × BAF
 ```
 
 </details>
