@@ -101,7 +101,7 @@ When disruption hits, we don't just ask "did it happen?" — we ask "how much di
 
 ---
 
-## 🗺️ Use Case Overview
+## 👤 Use Case Overview
 
 <img src="assets/usecase-diagram.svg" alt="GigShield use case diagram" width="100%"/>
 
@@ -240,7 +240,7 @@ Delivery workers switch phones frequently and app store installations create fri
 
 ---
 
-# 🛡️ Adversarial Defense & Anti-Spoofing Strategy
+#  Adversarial Defense & Anti-Spoofing Strategy
 
 > *A coordinated syndicate of 500 workers using GPS-spoofing apps to fake flood-zone locations and drain the liquidity pool is not a hypothetical — it is a documented attack vector. GigShield was already designed around the assumption that no single signal is trustworthy. Here is exactly how our architecture handles it.*
 
