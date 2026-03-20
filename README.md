@@ -20,7 +20,7 @@
 - [Parametric Triggers](#-parametric-triggers)
 - [Feasibility](#-feasibility)
 - [Tech Stack & Development Plan](#️-tech-stack--development-plan)
-- [2-Minute Video](#-2-minute-video)
+- [Brief explanation video](#-brief-explanation-video)
 
 ### Adversarial Defense & Anti-Spoofing
 - [How We Handle GPS Spoofing & Coordinated Fraud Rings](#adversarial-defense-and-anti-spoofing-strategy)
@@ -235,7 +235,7 @@ Delivery workers switch phones frequently and app store installations create fri
 
 ---
 
-## 🎥 2-Minute Video
+## 🎥 Brief Explanation Video
 
 [![Watch the video](https://img.shields.io/badge/▶%20Watch-2%20Minute%20Overview-red?style=for-the-badge)](https://drive.google.com/file/d/1bdd264cD7bH50AdBTwIY2AVyDyt4H0Um/view?usp=sharing)
 
