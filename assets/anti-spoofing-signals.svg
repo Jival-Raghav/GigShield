@@ -1,0 +1,63 @@
+<svg width="900" height="380" viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="380" fill="#0F172A" rx="12"/>
+  <rect x="1" y="1" width="898" height="378" rx="12" fill="none" stroke="#1E293B" stroke-width="1.5"/>
+  <text x="450" y="32" font-family="Georgia, serif" font-size="15" font-weight="700" fill="#F1F5F9" text-anchor="middle">Multi-Signal Spoofing Detection — 7 Independent Verification Streams</text>
+  <line x1="150" y1="42" x2="750" y2="42" stroke="#1E293B" stroke-width="1"/>
+  <circle cx="450" cy="200" r="38" fill="#1E3A5F" stroke="#38BDF8" stroke-width="2"/>
+  <text x="450" y="195" font-family="Arial" font-size="22" text-anchor="middle">&#128100;</text>
+  <text x="450" y="212" font-family="Arial, sans-serif" font-size="10" fill="#38BDF8" text-anchor="middle" font-weight="700">WORKER</text>
+  <text x="450" y="225" font-family="Arial, sans-serif" font-size="9" fill="#64748B" text-anchor="middle">CLAIM FILED</text>
+  <circle cx="160" cy="90" r="46" fill="#1F0A0A" stroke="#EF4444" stroke-width="2"/>
+  <text x="160" y="82" font-family="Arial, sans-serif" font-size="20" text-anchor="middle">&#128205;</text>
+  <text x="160" y="100" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#EF4444" text-anchor="middle">GPS</text>
+  <text x="160" y="114" font-family="Arial, sans-serif" font-size="9" fill="#FCA5A5" text-anchor="middle">Spoofable</text>
+  <text x="160" y="126" font-family="Arial, sans-serif" font-size="8" fill="#7F1D1D" text-anchor="middle">1 of 7 signals</text>
+  <line x1="203" y1="115" x2="415" y2="173" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.7"/>
+  <circle cx="90" cy="210" r="46" fill="#052E16" stroke="#16A34A" stroke-width="2"/>
+  <text x="90" y="202" font-family="Arial, sans-serif" font-size="20" text-anchor="middle">&#128225;</text>
+  <text x="90" y="220" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#16A34A" text-anchor="middle">Cell Tower</text>
+  <text x="90" y="234" font-family="Arial, sans-serif" font-size="9" fill="#86EFAC" text-anchor="middle">Hard to fake</text>
+  <text x="90" y="246" font-family="Arial, sans-serif" font-size="8" fill="#14532D" text-anchor="middle">Telecom data</text>
+  <line x1="137" y1="210" x2="412" y2="200" stroke="#16A34A" stroke-width="1.5" opacity="0.7"/>
+  <circle cx="160" cy="320" r="46" fill="#052E16" stroke="#16A34A" stroke-width="2"/>
+  <text x="160" y="312" font-family="Arial, sans-serif" font-size="20" text-anchor="middle">&#128242;</text>
+  <text x="160" y="330" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#16A34A" text-anchor="middle">Accelerometer</text>
+  <text x="160" y="344" font-family="Arial, sans-serif" font-size="9" fill="#86EFAC" text-anchor="middle">Device sensor</text>
+  <text x="160" y="356" font-family="Arial, sans-serif" font-size="8" fill="#14532D" text-anchor="middle">Motion patterns</text>
+  <line x1="203" y1="297" x2="418" y2="228" stroke="#16A34A" stroke-width="1.5" opacity="0.7"/>
+  <circle cx="450" cy="340" r="46" fill="#052E16" stroke="#16A34A" stroke-width="2"/>
+  <text x="450" y="332" font-family="Arial, sans-serif" font-size="20" text-anchor="middle">&#127758;</text>
+  <text x="450" y="350" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#16A34A" text-anchor="middle">IP Geolocation</text>
+  <text x="450" y="364" font-family="Arial, sans-serif" font-size="9" fill="#86EFAC" text-anchor="middle">Home WiFi detectable</text>
+  <line x1="450" y1="294" x2="450" y2="238" stroke="#16A34A" stroke-width="1.5" opacity="0.7"/>
+  <circle cx="740" cy="320" r="46" fill="#052E16" stroke="#16A34A" stroke-width="2"/>
+  <text x="740" y="312" font-family="Arial, sans-serif" font-size="20" text-anchor="middle">&#128506;</text>
+  <text x="740" y="330" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#16A34A" text-anchor="middle">Route History</text>
+  <text x="740" y="344" font-family="Arial, sans-serif" font-size="9" fill="#86EFAC" text-anchor="middle">Our own data</text>
+  <text x="740" y="356" font-family="Arial, sans-serif" font-size="8" fill="#14532D" text-anchor="middle">Zone familiarity</text>
+  <line x1="697" y1="297" x2="482" y2="228" stroke="#16A34A" stroke-width="1.5" opacity="0.7"/>
+  <circle cx="810" cy="210" r="46" fill="#1C0A00" stroke="#D97706" stroke-width="2"/>
+  <text x="810" y="202" font-family="Arial, sans-serif" font-size="20" text-anchor="middle">&#128230;</text>
+  <text x="810" y="220" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#D97706" text-anchor="middle">Order Behaviour</text>
+  <text x="810" y="234" font-family="Arial, sans-serif" font-size="9" fill="#FCD34D" text-anchor="middle">Platform data</text>
+  <text x="810" y="246" font-family="Arial, sans-serif" font-size="8" fill="#92400E" text-anchor="middle">Acceptance rate</text>
+  <line x1="763" y1="210" x2="488" y2="200" stroke="#D97706" stroke-width="1.5" opacity="0.7"/>
+  <circle cx="740" cy="90" r="46" fill="#1C0A00" stroke="#D97706" stroke-width="2"/>
+  <text x="740" y="82" font-family="Arial, sans-serif" font-size="20" text-anchor="middle">&#128269;</text>
+  <text x="740" y="100" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#D97706" text-anchor="middle">Cluster Detection</text>
+  <text x="740" y="114" font-family="Arial, sans-serif" font-size="9" fill="#FCD34D" text-anchor="middle">Statistical flag</text>
+  <text x="740" y="126" font-family="Arial, sans-serif" font-size="8" fill="#92400E" text-anchor="middle">Ring detection</text>
+  <line x1="697" y1="115" x2="483" y2="173" stroke="#D97706" stroke-width="1.5" opacity="0.7"/>
+  <rect x="330" y="155" width="240" height="90" rx="8" fill="#0F172A" stroke="#38BDF8" stroke-width="1.5"/>
+  <text x="450" y="175" font-family="Arial, sans-serif" font-size="10" fill="#64748B" text-anchor="middle">SPOOF DETECTED IF</text>
+  <text x="450" y="194" font-family="Georgia, serif" font-size="14" font-weight="700" fill="#38BDF8" text-anchor="middle">3 or more signals mismatch</text>
+  <line x1="350" y1="202" x2="550" y2="202" stroke="#1E293B" stroke-width="1"/>
+  <text x="450" y="218" font-family="Arial, sans-serif" font-size="9" fill="#94A3B8" text-anchor="middle">Genuine worker needs only 4 of 7 to match</text>
+  <text x="450" y="232" font-family="Arial, sans-serif" font-size="9" fill="#94A3B8" text-anchor="middle">Spoofer fails cell tower + accel + IP simultaneously</text>
+  <circle cx="310" cy="362" r="6" fill="#EF4444"/>
+  <text x="322" y="367" font-family="Arial, sans-serif" font-size="10" fill="#94A3B8">Spoofable signal</text>
+  <circle cx="430" cy="362" r="6" fill="#16A34A"/>
+  <text x="442" y="367" font-family="Arial, sans-serif" font-size="10" fill="#94A3B8">Hard to fake</text>
+  <circle cx="535" cy="362" r="6" fill="#D97706"/>
+  <text x="547" y="367" font-family="Arial, sans-serif" font-size="10" fill="#94A3B8">Behavioural signal</text>
+</svg>
