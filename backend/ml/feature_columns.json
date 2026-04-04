@@ -1,0 +1,9 @@
+[
+  "week_of_year",
+  "month",
+  "zone_risk_bucket",
+  "disruptions_last_4_weeks",
+  "avg_severity_last_4_weeks",
+  "disruptions_same_month_last_year",
+  "platform_volatility_index"
+]
