@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="assets/hero-banner.svg" alt="GigShield by InsureEase" width="100%"/>
+<img src="assets/hero-banner.svg" alt="Raah Saathi by InsureEase" width="100%"/>
+
+<h3><em>Because the road doesn't pay sick leave.</em></h3>
 
 </div>
 
@@ -8,11 +10,11 @@
 
 ## 📋 Table of Contents
 
-### 🚀 The GigShield Story *(start here)*
+### 🚀 The Raah Saathi Story *(start here)*
 - [The Problem](#-the-problem)
 - [Why Now](#-why-now)
 - [Meet the Workers](#-meet-the-workers)
-- [How GigShield Works](#-how-gigshield-works)
+- [How Raah Saathi Works](#-how-raah-saathi-works-1)
 - [Use Case Overview](#-use-case-overview)
 - [AI/ML Integration](#-aiml-integration)
 - [What Makes Us Different](#-what-makes-us-different)
@@ -66,9 +68,9 @@ The convergence of a growing gig workforce, increasing climate volatility, real-
 
 ---
 
-## 👤 How GigShield Works
+## 👤 How Raah Saathi Works
 
-<img src="assets/system-pipeline.svg" alt="GigShield 4-module pipeline" width="100%"/>
+<img src="assets/system-pipeline.svg" alt="Raah Saathi 4-module pipeline" width="100%"/>
 
 **🔵 Part 1 — Baseline Income: What should you have earned?**
 
@@ -100,9 +102,9 @@ When disruption hits, we don't just ask "did it happen?" — we ask "how much di
 
 ## 👤 Use Case Overview
 
-<img src="assets/usecase-diagram.svg" alt="GigShield use case diagram" width="100%"/>
+<img src="assets/usecase-diagram.svg" alt="Raah Saathi use case diagram" width="100%"/>
 
-Three actor types interact with the system: **Workers** (register, pay premiums, receive payouts), the **GigShield Platform** (auto-detect, validate, calculate, pay), and **Insurers/Admin** (monitor dashboards, review flagged claims, track loss ratios).
+Three actor types interact with the system: **Workers** (register, pay premiums, receive payouts), the **Raah Saathi Platform** (auto-detect, validate, calculate, pay), and **Insurers/Admin** (monitor dashboards, review flagged claims, track loss ratios).
 
 ---
 
@@ -154,7 +156,7 @@ Good behaviour earns premium discounts. Gaming is penalised gradually across a 5
 
 ## 🆚 vs Existing Solutions
 
-| Feature | Traditional Insurance | Existing Gig Products | **GigShield** |
+| Feature | Traditional Insurance | Existing Gig Products | **Raah Saathi** |
 |---|---|---|---|
 | Claim process | Manual — forms + photos | Semi-manual | ✅ Fully automatic |
 | Payout time | 2–3 weeks | Days | ✅ **< 2 hours** |
@@ -239,11 +241,11 @@ Delivery workers switch phones frequently and app store installations create fri
 
 # Adversarial Defense and Anti-Spoofing Strategy
 
-> *A coordinated syndicate of 500 workers using GPS-spoofing apps to fake flood-zone locations and drain the liquidity pool is not a hypothetical — it is a documented attack vector. GigShield was already designed around the assumption that no single signal is trustworthy. Here is exactly how our architecture handles it.*
+> *A coordinated syndicate of 500 workers using GPS-spoofing apps to fake flood-zone locations and drain the liquidity pool is not a hypothetical — it is a documented attack vector. Raah Saathi was already designed around the assumption that no single signal is trustworthy. Here is exactly how our architecture handles it.*
 
 ---
 
-### ✅ What GigShield Already Covers — 60% neutralised by existing architecture
+### ✅ What Raah Saathi Already Covers — 60% neutralised by existing architecture
 
 | Existing Defense | How It Handles the Attack |
 |---|---|
@@ -277,7 +279,7 @@ A genuinely stranded delivery worker in a flood zone will show GPS location cons
 
 A spoofing worker at home will show GPS location they have rarely or never visited, cell tower data placing them at a residential address, a stationary accelerometer with no route progression, and stable home WiFi throughout the claimed disruption.
 
-GigShield cross-checks all signals. A mismatch between GPS and any two or more other signals triggers a spoofing flag.
+Raah Saathi cross-checks all signals. A mismatch between GPS and any two or more other signals triggers a spoofing flag.
 
 ---
 
@@ -340,9 +342,9 @@ spoofing_signals_fired >= 3      →  Hold payout — do NOT reject
 
 ### 🧠 Why This Architecture Is Robust
 
-The syndicate attack assumes GPS is the only location signal. GigShield treats GPS as one of seven. To successfully spoof GigShield, an attacker would need to simultaneously fake GPS coordinates, cell tower data, device accelerometer, IP geolocation, and order behaviour — across 500 devices — in a coordinated time window — without triggering the cluster detection algorithm.
+The syndicate attack assumes GPS is the only location signal. Raah Saathi treats GPS as one of seven. To successfully spoof Raah Saathi, an attacker would need to simultaneously fake GPS coordinates, cell tower data, device accelerometer, IP geolocation, and order behaviour — across 500 devices — in a coordinated time window — without triggering the cluster detection algorithm.
 
-> *GigShield was already designed around the assumption that no single signal is trustworthy. This challenge confirms that was the right call.*
+> *Raah Saathi was already designed around the assumption that no single signal is trustworthy. This challenge confirms that was the right call.*
 
 
 ---
