@@ -3,12 +3,12 @@
   <rect x="1" y="1" width="898" height="418" rx="12" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
 
   <!-- title -->
-  <text x="450" y="30" font-family="Georgia, serif" font-size="16" font-weight="700" fill="#1E293B" text-anchor="middle">GigShield — Use Case Diagram</text>
+  <text x="450" y="30" font-family="Georgia, serif" font-size="16" font-weight="700" fill="#1E293B" text-anchor="middle">Raah Saathi— Use Case Diagram</text>
   <line x1="250" y1="38" x2="650" y2="38" stroke="#E2E8F0" stroke-width="1"/>
 
   <!-- System boundary -->
   <rect x="240" y="50" width="420" height="340" rx="8" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="6,3"/>
-  <text x="450" y="68" font-family="Arial, sans-serif" font-size="11" fill="#64748B" text-anchor="middle">«system»  GigShield Platform</text>
+  <text x="450" y="68" font-family="Arial, sans-serif" font-size="11" fill="#64748B" text-anchor="middle">«system»  Raah Saathi Platform</text>
 
   <!-- Use case ellipses - worker side -->
   <ellipse cx="390" cy="110" rx="75" ry="20" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.2"/>
