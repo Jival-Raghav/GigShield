@@ -18,7 +18,7 @@
   <!-- accent line -->
   <rect x="40" y="40" width="4" height="120" fill="url(#accent)" rx="2"/>
   <!-- title -->
-  <text x="60" y="85" font-family="Georgia, serif" font-size="48" font-weight="700" fill="#FFFFFF">GigShield</text>
+  <text x="60" y="85" font-family="Georgia, serif" font-size="48" font-weight="700" fill="#FFFFFF">Raah Saathi</text>
   <text x="62" y="108" font-family="Georgia, serif" font-size="14" fill="url(#accent)" letter-spacing="3">BY INSUREEASE</text>
   <!-- tagline -->
   <text x="60" y="138" font-family="Arial, sans-serif" font-size="14" fill="#93C5FD">Parametric income insurance for India's gig delivery workers</text>
