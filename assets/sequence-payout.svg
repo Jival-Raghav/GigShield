@@ -25,7 +25,7 @@
 
   <!-- GigShield System -->
   <rect x="220" y="48" width="130" height="40" rx="6" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
-  <text x="285" y="65" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#1E3A8A" text-anchor="middle">GigShield</text>
+  <text x="285" y="65" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#1E3A8A" text-anchor="middle">Raah Saathi</text>
   <text x="285" y="80" font-family="Arial, sans-serif" font-size="9" fill="#1D4ED8" text-anchor="middle">Validation Engine</text>
   <line x1="285" y1="88" x2="285" y2="500" stroke="#2563EB" stroke-width="1" stroke-dasharray="5,3"/>
 
@@ -84,7 +84,7 @@
 
   <!-- System → Worker (notification) -->
   <line x1="295" y1="445" x2="785" y2="445" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5,2" marker-end="url(#sa)"/>
-  <text x="540" y="438" font-family="Arial, sans-serif" font-size="10" fill="#92400E" text-anchor="middle">Notification: GigShield paid ₹2,940 for flood disruption</text>
+  <text x="540" y="438" font-family="Arial, sans-serif" font-size="10" fill="#92400E" text-anchor="middle">Notification: Raah Saathi paid ₹2,940 for flood disruption</text>
 
   <!-- System self: trust update -->
   <path d="M290,462 Q340,462 340,473 Q340,484 290,484" fill="none" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#sa)"/>
