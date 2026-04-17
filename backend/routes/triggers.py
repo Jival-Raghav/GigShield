@@ -15,7 +15,7 @@ from models.policy import Policy
 from models.worker import Worker
 from schemas.disruption import DisruptionCreate, DisruptionResponse, TriggerCheck
 from services import trigger_monitor
-from services.claim_processing import evaluate_and_assign_claim
+from services.claim_processing import evaluate_and_assign_claim, try_auto_pay_claim
 
 router = APIRouter(tags=["Triggers"])
 
@@ -26,6 +26,9 @@ async def check_triggers(
     db: Session = Depends(get_db),
     current_worker: Worker = Depends(get_current_worker),
 ) -> list[Disruption]:
+    if payload.zone_id != current_worker.micro_zone_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Can only check triggers for your own zone")
+
     try:
         disruptions = await trigger_monitor.check_all_triggers(zone_id=payload.zone_id, db=db)
     except NotImplementedError as exc:
@@ -65,7 +68,11 @@ async def simulate_disruption(
     db: Session = Depends(get_db),
     current_worker: Worker = Depends(get_current_worker),
 ) -> dict:
+    if payload.zone_id != current_worker.micro_zone_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Can only simulate disruptions in your own zone")
+
     started_at = payload.started_at or datetime.now(timezone.utc)
+    ended_at = payload.ended_at
 
     disruption = Disruption(
         zone_id=payload.zone_id,
@@ -75,12 +82,13 @@ async def simulate_disruption(
         is_confirmed=True,
         is_catastrophic=payload.severity > 0.9,
         started_at=started_at,
-        ended_at=payload.ended_at,
+        ended_at=ended_at,
     )
     db.add(disruption)
     db.flush()
 
     initiated = 0
+    auto_paid = 0
     if disruption.ended_at is not None:
         workers = db.query(Worker).filter(Worker.micro_zone_id == payload.zone_id).all()
         for worker in workers:
@@ -109,6 +117,15 @@ async def simulate_disruption(
             )
 
             db.add(claim)
+            db.flush()
+            if try_auto_pay_claim(
+                claim=claim,
+                policy=policy,
+                db=db,
+                reference_prefix="SIM-END",
+                risk_override=True,
+            ):
+                auto_paid += 1
             initiated += 1
 
     db.commit()
@@ -117,6 +134,7 @@ async def simulate_disruption(
     return {
         "disruption": DisruptionResponse.model_validate(disruption).model_dump(),
         "claims_initiated": initiated,
+        "claims_auto_paid": auto_paid,
     }
 
 
@@ -126,6 +144,9 @@ def active_disruptions(
     db: Session = Depends(get_db),
     current_worker: Worker = Depends(get_current_worker),
 ) -> list[Disruption]:
+    if zone_id != current_worker.micro_zone_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Can only view active disruptions in your own zone")
+
     return (
         db.query(Disruption)
         .filter(Disruption.zone_id == zone_id, Disruption.ended_at.is_(None))
@@ -141,7 +162,9 @@ def claimable_disruptions(
     db: Session = Depends(get_db),
     current_worker: Worker = Depends(get_current_worker),
 ) -> list[Disruption]:
-    _ = current_worker
+    if zone_id != current_worker.micro_zone_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Can only view claimable disruptions in your own zone")
+
     safe_lookback = max(1, min(lookback_days, 90))
     since = datetime.now(timezone.utc) - timedelta(days=safe_lookback)
     return (

@@ -12,6 +12,7 @@ from services import (
     registration_service,
     risk_model,
     trigger_monitor,
+    wallet_service,
 )
 
 __all__ = [
@@ -26,4 +27,5 @@ __all__ = [
     "registration_service",
     "risk_model",
     "trigger_monitor",
+    "wallet_service",
 ]

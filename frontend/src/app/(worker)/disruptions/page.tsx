@@ -71,26 +71,39 @@ export default function DisruptionsPage() {
   const simulateMutation = useSimulateDisruption();
   
   const [simulateOpen, setSimulateOpen] = useState(false);
+  const now = new Date();
+  const fiveHoursAgo = new Date(now.getTime() - (5 * 60 * 60 * 1000));
+  const toLocalInput = (value: Date) => {
+    const copy = new Date(value.getTime() - (value.getTimezoneOffset() * 60 * 1000));
+    return copy.toISOString().slice(0, 16);
+  };
   const [simulateForm, setSimulateForm] = useState({
     disruption_type: 'rainfall' as DisruptionType,
     severity: 0.7,
+    started_at: toLocalInput(fiveHoursAgo),
+    ended_at: toLocalInput(now),
   });
 
   const handleSimulate = async () => {
     if (!worker) return;
     
     try {
-      await simulateMutation.mutateAsync({
+      const result = await simulateMutation.mutateAsync({
         zone_id: worker.micro_zone_id,
         disruption_type: simulateForm.disruption_type,
         severity: simulateForm.severity,
         signal_source: 'MANUAL_SIMULATION',
+        started_at: new Date(simulateForm.started_at).toISOString(),
+        ended_at: new Date(simulateForm.ended_at).toISOString(),
       });
-      toast.success('Disruption simulated successfully!');
+      toast.success(
+        `Disruption simulated. Claims initiated: ${result.claims_initiated}, auto-paid: ${result.claims_auto_paid}.`
+      );
       setSimulateOpen(false);
       refetch();
-    } catch {
-      toast.error('Failed to simulate disruption');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to simulate disruption';
+      toast.error(message);
     }
   };
 
@@ -174,6 +187,25 @@ export default function DisruptionsPage() {
                   />
                   <p className="text-xs text-gray-500">
                     Higher severity = greater income impact
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Start Time</Label>
+                  <Input
+                    type="datetime-local"
+                    value={simulateForm.started_at}
+                    onChange={(e) => setSimulateForm({ ...simulateForm, started_at: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>End Time</Label>
+                  <Input
+                    type="datetime-local"
+                    value={simulateForm.ended_at}
+                    onChange={(e) => setSimulateForm({ ...simulateForm, ended_at: e.target.value })}
+                  />
+                  <p className="text-xs text-gray-500">
+                    Set an ended time (for example 12:00 to 17:00) to trigger auto-claim and auto-pay demo flow.
                   </p>
                 </div>
               </div>

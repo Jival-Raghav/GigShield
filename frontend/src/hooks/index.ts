@@ -1,4 +1,4 @@
-export { useWorker, useUpdateWorker } from './useWorker';
+export { useWorker, useUpdateWorker, useWorkerWallet } from './useWorker';
 export { usePolicies, useCreatePolicy, useDeletePolicy, useBaseline, usePremiumQuote } from './usePolicies';
 export { useClaims, useClaim, useInitiateClaim, useUpdateClaimStatus, useInitiatePayout } from './useClaims';
 export { useDisruptions, useClaimableDisruptions, useSimulateDisruption } from './useDisruptions';

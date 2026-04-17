@@ -7,6 +7,7 @@ from models.payout import PaymentMethodEnum, PaymentStatusEnum, Payout
 from models.worker import PlatformEnum, VehicleTypeEnum, Worker
 from models.worker_income import PeerClusterStats, WorkerDailyIncome
 from models.worker_location_trace import WorkerLocationTrace
+from models.wallet import WalletEntryTypeEnum, WalletTransaction, WorkerWallet
 
 __all__ = [
     "Worker",
@@ -24,4 +25,7 @@ __all__ = [
     "WorkerDailyIncome",
     "PeerClusterStats",
     "WorkerLocationTrace",
+    "WorkerWallet",
+    "WalletTransaction",
+    "WalletEntryTypeEnum",
 ]

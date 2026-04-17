@@ -5,6 +5,7 @@ from schemas.claim import ClaimCreate, ClaimResponse, ClaimStatusUpdate
 from schemas.disruption import DisruptionCreate, DisruptionResponse, TriggerCheck, TriggerCheckResponse
 from schemas.policy import PolicyCreate, PolicyResponse, PremiumQuote, PremiumQuoteRequest, PremiumQuoteResponse
 from schemas.payout import PayoutCreate, PayoutResponse
+from schemas.wallet import WalletTransactionResponse, WorkerWalletResponse
 from schemas.worker import WorkerCreate, WorkerResponse, WorkerUpdate
 
 __all__ = [
@@ -30,4 +31,6 @@ __all__ = [
     "TriggerCheckResponse",
     "PayoutCreate",
     "PayoutResponse",
+    "WorkerWalletResponse",
+    "WalletTransactionResponse",
 ]

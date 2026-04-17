@@ -5,6 +5,7 @@ import type {
   WorkerUpdate,
   WorkerLocationTraceCreate,
   WorkerLocationTraceResponse,
+  WorkerWallet,
   Policy,
   PolicyCreate,
   PremiumQuote,
@@ -12,6 +13,7 @@ import type {
   BaselineResult,
   Disruption,
   DisruptionSimulate,
+  DisruptionSimulateResult,
   Claim,
   ClaimCreate,
   ClaimStatusUpdate,
@@ -64,6 +66,11 @@ export const workersApi = {
 
   addLocationTrace: async (payload: WorkerLocationTraceCreate): Promise<WorkerLocationTraceResponse> => {
     const { data } = await api.post<WorkerLocationTraceResponse>('/workers/location/trace', payload);
+    return data;
+  },
+
+  getWallet: async (workerId: string): Promise<WorkerWallet> => {
+    const { data } = await api.get<WorkerWallet>(`/workers/${workerId}/wallet`);
     return data;
   },
 };
@@ -119,8 +126,8 @@ export const triggersApi = {
     return data;
   },
 
-  simulate: async (payload: DisruptionSimulate): Promise<Disruption> => {
-    const { data } = await api.post<Disruption>('/triggers/simulate', payload);
+  simulate: async (payload: DisruptionSimulate): Promise<DisruptionSimulateResult> => {
+    const { data } = await api.post<DisruptionSimulateResult>('/triggers/simulate', payload);
     return data;
   },
 };

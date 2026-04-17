@@ -11,7 +11,7 @@ from models.disruption import Disruption
 from models.payout import PaymentMethodEnum, PaymentStatusEnum, Payout
 from models.policy import Policy
 from models.worker import Worker
-from services import fraud_ai, fraud_detection, payout_engine
+from services import fraud_ai, fraud_detection, payout_engine, wallet_service
 
 
 def evaluate_and_assign_claim(
@@ -114,14 +114,26 @@ def evaluate_and_assign_claim(
     return claim
 
 
-def try_auto_pay_claim(*, claim: Claim, policy: Policy, db, reference_prefix: str = "AUTO-INSTANT") -> bool:
-    """Auto-pay low-risk approved claims immediately, respecting weekly coverage cap."""
-    if claim.status != ClaimStatusEnum.approved:
-        return False
-    if claim.audit_required:
-        return False
-    if float(claim.fraud_score or 100.0) >= 55.0:
-        return False
+def try_auto_pay_claim(
+    *,
+    claim: Claim,
+    policy: Policy,
+    db,
+    reference_prefix: str = "AUTO-INSTANT",
+    risk_override: bool = False,
+) -> bool:
+    """Auto-pay claims immediately, respecting weekly coverage cap.
+
+    By default, only low-risk approved claims are auto-paid. For demo/simulation
+    flows, callers can set ``risk_override=True`` to bypass fraud/status gating.
+    """
+    if not risk_override:
+        if claim.status != ClaimStatusEnum.approved:
+            return False
+        if claim.audit_required:
+            return False
+        if float(claim.fraud_score or 100.0) >= 55.0:
+            return False
 
     payable_amount = round(float(claim.payout_amount or 0.0), 2)
     if payable_amount <= 0.0:
@@ -162,4 +174,10 @@ def try_auto_pay_claim(*, claim: Claim, policy: Policy, db, reference_prefix: st
         completed_at=now,
     )
     db.add(payout)
+    db.flush()
+    wallet_service.credit_for_completed_payout(
+        db=db,
+        payout=payout,
+        description="Auto payout credited for ended disruption",
+    )
     return True

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { usePolicies, useClaims, useDisruptions } from '@/hooks';
+import { usePolicies, useClaims, useDisruptions, useWorkerWallet } from '@/hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const { data: policies, isLoading: policiesLoading, error: policiesError } = usePolicies(worker?.id || null);
   const { data: claims, isLoading: claimsLoading, error: claimsError } = useClaims(worker?.id || null);
   const { data: disruptions, isLoading: disruptionsLoading } = useDisruptions(worker?.micro_zone_id || null);
+  const { data: wallet } = useWorkerWallet(worker?.id || null);
 
   const isLoading = policiesLoading || claimsLoading;
 
@@ -142,7 +143,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Protection Intelligence */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard
           title="Earnings Protected"
           value={formatCurrency(protectedEarnings)}
@@ -170,6 +171,13 @@ export default function DashboardPage() {
           description={activeDisruptions.length > 0 ? `${activeDisruptions.length} disruptions near your zone` : 'No active zone threats'}
           icon={Brain}
           iconColor="bg-amber-100 text-amber-600"
+        />
+        <StatCard
+          title="Mock Wallet"
+          value={formatCurrency(wallet?.balance || 0)}
+          description="Auto-paid claims are credited here"
+          icon={Wallet}
+          iconColor="bg-emerald-100 text-emerald-600"
         />
       </div>
 
@@ -202,6 +210,21 @@ export default function DashboardPage() {
               <p className="mt-1 text-xl font-bold text-gray-900">{activeDisruptions.length > 0 ? 'Watch' : 'Stable'}</p>
               <p className="text-xs text-gray-500 mt-1">Based on current zone disruptions</p>
             </div>
+          </div>
+          <div className="mt-4 rounded-lg border bg-gray-50 p-4">
+            <p className="text-sm text-gray-500">Recent wallet credits</p>
+            {wallet?.recent_transactions && wallet.recent_transactions.length > 0 ? (
+              <div className="mt-2 space-y-2">
+                {wallet.recent_transactions.slice(0, 4).map((tx) => (
+                  <div key={tx.id} className="flex items-center justify-between text-sm">
+                    <span className="text-gray-700 truncate pr-2">{tx.description}</span>
+                    <span className="font-medium text-emerald-700">+{formatCurrency(tx.amount)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-gray-500">No wallet credits yet.</p>
+            )}
           </div>
         </CardContent>
       </Card>

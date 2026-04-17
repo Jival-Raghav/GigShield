@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from models.disruption import DisruptionTypeEnum
 
@@ -17,6 +17,12 @@ class DisruptionCreate(BaseModel):
     signal_source: str
     started_at: datetime | None = None
     ended_at: datetime | None = None
+
+    @model_validator(mode="after")
+    def validate_time_window(self) -> "DisruptionCreate":
+        if self.started_at and self.ended_at and self.ended_at <= self.started_at:
+            raise ValueError("ended_at must be later than started_at")
+        return self
 
 
 class TriggerCheck(BaseModel):

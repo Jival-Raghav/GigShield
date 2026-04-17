@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from config import settings
 from models.payout import PaymentStatusEnum, Payout
 from models.worker import Worker
+from services import wallet_service
 
 logger = logging.getLogger(__name__)
 
@@ -147,6 +148,15 @@ def initiate_gateway_payout(
         _simulate_provider_payout(payout=payout, gateway=selected_gateway)
 
     db.add(payout)
+    db.flush()
+
+    if payout.payment_status == PaymentStatusEnum.completed:
+        wallet_service.credit_for_completed_payout(
+            db=db,
+            payout=payout,
+            description=f"Payout credited via {selected_gateway}",
+        )
+
     db.commit()
     db.refresh(payout)
     return payout

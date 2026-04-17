@@ -127,6 +127,15 @@ export interface Claim {
   status: ClaimStatus;
   baf_score: number;
   payout_amount: number;
+  started_at?: string;
+  ended_at?: string;
+}
+
+export interface DisruptionSimulateResult {
+  disruption: Disruption;
+  claims_initiated: number;
+  claims_auto_paid: number;
+}
   income_lost: number;
   eligible_hours: number;
   severity_smoothed: number;
@@ -134,6 +143,22 @@ export interface Claim {
   behavior_confidence: number;
   unified_confidence: number;
   spoofing_signals_fired: number;
+export interface WalletTransaction {
+  id: string;
+  amount: number;
+  entry_type: 'credit' | 'debit';
+  description: string;
+  payout_id: string | null;
+  claim_id: string | null;
+  created_at: string;
+}
+
+export interface WorkerWallet {
+  worker_id: string;
+  balance: number;
+  updated_at: string;
+  recent_transactions: WalletTransaction[];
+}
   syndicate_flag: boolean;
   audit_required: boolean;
   audit_reason: string | null;

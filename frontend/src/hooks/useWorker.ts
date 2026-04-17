@@ -22,3 +22,13 @@ export function useUpdateWorker(workerId: string) {
     },
   });
 }
+
+export function useWorkerWallet(workerId: string | null) {
+  return useQuery({
+    queryKey: ['wallet', workerId],
+    queryFn: () => workersApi.getWallet(workerId!),
+    enabled: !!workerId,
+    refetchInterval: 30 * 1000,
+    staleTime: 10 * 1000,
+  });
+}
