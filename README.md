@@ -238,6 +238,8 @@ Delivery workers switch phones frequently and app store installations create fri
 ## 🎥 Brief Explanation Video
 
 [![Watch the video](https://img.shields.io/badge/▶%20Watch-Brief%20Overview-red?style=for-the-badge)](https://drive.google.com/file/d/1bdd264cD7bH50AdBTwIY2AVyDyt4H0Um/view?usp=sharing)
+## Pitch Deck
+[Pitch Deck](https://docs.google.com/presentation/d/1WQ2pPkeIvIyxKuAGQCaqEwvzHZgud3cC/edit?usp=sharing&ouid=102951930108795841544&rtpof=true&sd=true)
 
 ---
 
