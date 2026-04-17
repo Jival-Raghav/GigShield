@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '@/lib/api';
-import type { ClaimStatusUpdate } from '@/types';
+import type { ClaimScenarioInput, ClaimStatusUpdate } from '@/types';
 
 export function useAdminDashboard() {
   return useQuery({
@@ -24,6 +24,14 @@ export function useZoneRisk() {
   return useQuery({
     queryKey: ['admin', 'zoneRisk'],
     queryFn: () => adminApi.getZoneRisk(),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useFraudClusters() {
+  return useQuery({
+    queryKey: ['admin', 'fraudClusters'],
+    queryFn: () => adminApi.getFraudClusters(),
     staleTime: 60 * 1000,
   });
 }
@@ -60,5 +68,22 @@ export function useRunSettlement() {
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'flaggedClaims'] });
     },
+  });
+}
+
+export function useClaimTimeline(claimId: string | null) {
+  return useQuery({
+    queryKey: ['admin', 'claimTimeline', claimId],
+    queryFn: () => adminApi.getClaimTimeline(claimId!),
+    enabled: !!claimId,
+    refetchInterval: 30 * 1000,
+    staleTime: 10 * 1000,
+  });
+}
+
+export function useSimulateClaimScenario() {
+  return useMutation({
+    mutationFn: ({ claimId, payload }: { claimId: string; payload: ClaimScenarioInput }) =>
+      adminApi.simulateClaim(claimId, payload),
   });
 }

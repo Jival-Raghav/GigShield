@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -80,35 +80,36 @@ async def simulate_disruption(
     db.add(disruption)
     db.flush()
 
-    workers = db.query(Worker).filter(Worker.micro_zone_id == payload.zone_id).all()
     initiated = 0
-    for worker in workers:
-        policy = (
-            db.query(Policy)
-            .filter(Policy.worker_id == worker.id, Policy.is_active.is_(True))
-            .order_by(Policy.created_at.desc())
-            .first()
-        )
-        if policy is None:
-            continue
+    if disruption.ended_at is not None:
+        workers = db.query(Worker).filter(Worker.micro_zone_id == payload.zone_id).all()
+        for worker in workers:
+            policy = (
+                db.query(Policy)
+                .filter(Policy.worker_id == worker.id, Policy.is_active.is_(True))
+                .order_by(Policy.created_at.desc())
+                .first()
+            )
+            if policy is None:
+                continue
 
-        claim = Claim(
-            worker_id=worker.id,
-            policy_id=policy.id,
-            disruption_id=disruption.id,
-            status=ClaimStatusEnum.validating,
-        )
+            claim = Claim(
+                worker_id=worker.id,
+                policy_id=policy.id,
+                disruption_id=disruption.id,
+                status=ClaimStatusEnum.validating,
+            )
 
-        claim = evaluate_and_assign_claim(
-            worker=worker,
-            policy=policy,
-            disruption=disruption,
-            claim=claim,
-            db=db,
-        )
+            claim = evaluate_and_assign_claim(
+                worker=worker,
+                policy=policy,
+                disruption=disruption,
+                claim=claim,
+                db=db,
+            )
 
-        db.add(claim)
-        initiated += 1
+            db.add(claim)
+            initiated += 1
 
     db.commit()
     db.refresh(disruption)
@@ -129,5 +130,27 @@ def active_disruptions(
         db.query(Disruption)
         .filter(Disruption.zone_id == zone_id, Disruption.ended_at.is_(None))
         .order_by(Disruption.started_at.desc())
+        .all()
+    )
+
+
+@router.get("/triggers/claimable/{zone_id}", response_model=list[DisruptionResponse], status_code=status.HTTP_200_OK)
+def claimable_disruptions(
+    zone_id: str,
+    lookback_days: int = 14,
+    db: Session = Depends(get_db),
+    current_worker: Worker = Depends(get_current_worker),
+) -> list[Disruption]:
+    _ = current_worker
+    safe_lookback = max(1, min(lookback_days, 90))
+    since = datetime.now(timezone.utc) - timedelta(days=safe_lookback)
+    return (
+        db.query(Disruption)
+        .filter(
+            Disruption.zone_id == zone_id,
+            Disruption.ended_at.is_not(None),
+            Disruption.ended_at >= since,
+        )
+        .order_by(Disruption.ended_at.desc())
         .all()
     )

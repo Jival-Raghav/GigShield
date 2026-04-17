@@ -51,6 +51,10 @@ def premium_quote(
     except NotImplementedError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
 
+    # Compatibility: support engines that return trust_adjustment instead of trust_discount.
+    if "trust_discount" not in quote:
+        quote["trust_discount"] = float(quote.get("trust_adjustment", 1.0))
+
     return PremiumQuoteResponse(**quote)
 
 
@@ -64,10 +68,27 @@ def create_policy(
     if worker is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Worker not found")
 
+    if str(current_worker.id) != str(payload.worker_id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot create policy for another worker")
+
     try:
         quote = premium_engine.calculate_premium(worker=worker, coverage_tier=payload.coverage_tier.value, db=db)
     except NotImplementedError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+
+    trust_discount = float(quote.get("trust_discount", quote.get("trust_adjustment", 1.0)))
+    today = date.today()
+
+    # Enforce max one active policy per worker by deactivating older active policies first.
+    existing_active = (
+        db.query(Policy)
+        .filter(Policy.worker_id == payload.worker_id, Policy.is_active.is_(True))
+        .all()
+    )
+    for prev_policy in existing_active:
+        prev_policy.is_active = False
+        if prev_policy.valid_to > today:
+            prev_policy.valid_to = today
 
     policy = Policy(
         worker_id=payload.worker_id,
@@ -76,14 +97,39 @@ def create_policy(
         max_weekly_coverage=quote["max_weekly_coverage"],
         weekly_premium=quote["weekly_premium"],
         risk_multiplier=quote["risk_multiplier"],
-        trust_discount=quote["trust_discount"],
+        trust_discount=trust_discount,
         is_active=True,
-        valid_from=date.today(),
-        valid_to=date.today() + timedelta(days=7),
+        valid_from=today,
+        valid_to=today + timedelta(days=7),
     )
     db.add(policy)
     db.commit()
     db.refresh(policy)
+    return policy
+
+
+@router.delete("/policies/{policy_id}", response_model=PolicyResponse, status_code=status.HTTP_200_OK)
+def deactivate_policy(
+    policy_id: str,
+    db: Session = Depends(get_db),
+    current_worker: Worker = Depends(get_current_worker),
+) -> Policy:
+    policy = db.query(Policy).filter(Policy.id == policy_id).first()
+    if policy is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Policy not found")
+
+    if str(policy.worker_id) != str(current_worker.id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot modify another worker policy")
+
+    if policy.is_active:
+        policy.is_active = False
+        today = date.today()
+        if policy.valid_to > today:
+            policy.valid_to = today
+        db.add(policy)
+        db.commit()
+        db.refresh(policy)
+
     return policy
 
 

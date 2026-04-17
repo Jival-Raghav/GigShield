@@ -3,6 +3,7 @@
 import { useAdminDashboard, useFlaggedClaims, useRunSettlement } from '@/hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
+  StatCard,
   formatCurrency, 
   formatPercentage,
   StatusBadge,
@@ -18,6 +19,9 @@ import {
   TrendingUp,
   Activity,
   Users,
+  Brain,
+  MapPin,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -36,6 +40,7 @@ export default function AdminDashboardPage() {
   const { data: dashboard, isLoading, error, refetch } = useAdminDashboard();
   const { data: flaggedClaims } = useFlaggedClaims(5, 0);
   const runSettlement = useRunSettlement();
+  const topZoneForecast = dashboard?.zone_forecast_7d?.find((entry) => entry.zone_id === dashboard.top_risk_zone) || dashboard?.zone_forecast_7d?.[0];
 
   const handleRunCurrentWeekSettlement = async () => {
     try {
@@ -194,6 +199,143 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
+      {/* Intelligent Analytics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Next Week Claims"
+          value={dashboard?.projected_claims_next_week ? dashboard.projected_claims_next_week.toFixed(1) : '0.0'}
+          description="Projected weather/disruption claims"
+          icon={Brain}
+          iconColor="bg-violet-500/20 text-violet-300"
+        />
+        <StatCard
+          title="Projected Payouts"
+          value={formatCurrency(dashboard?.projected_payout_next_week || 0)}
+          description="Estimated claims spend next week"
+          icon={Wallet}
+          iconColor="bg-amber-500/20 text-amber-300"
+        />
+        <StatCard
+          title="Forecast Confidence"
+          value={formatPercentage(dashboard?.forecast_confidence || 0)}
+          description="Model confidence across active zones"
+          icon={Sparkles}
+          iconColor="bg-cyan-500/20 text-cyan-300"
+        />
+        <StatCard
+          title="Top Risk Zone"
+          value={dashboard?.top_risk_zone || 'None'}
+          description={dashboard?.top_risk_zone_projected_claims ? `${dashboard.top_risk_zone_projected_claims.toFixed(1)} claims projected` : 'No forecast available'}
+          icon={MapPin}
+          iconColor="bg-rose-500/20 text-rose-300"
+        />
+      </div>
+
+      <Card className="bg-gray-800 border-gray-700">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-white">Forecast Risk Map</CardTitle>
+            <CardDescription className="text-gray-400">
+              Top active zones by projected claim volume next week.
+            </CardDescription>
+          </div>
+          <Link href="/admin/zones">
+            <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:bg-gray-700">
+              View Zone Analysis
+            </Button>
+          </Link>
+        </CardHeader>
+        <CardContent>
+          {dashboard?.top_risk_zones && dashboard.top_risk_zones.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {dashboard.top_risk_zones.map((zone) => {
+                const severityPercent = Math.round((zone.expected_severity || 0) * 100);
+                return (
+                  <div key={zone.zone_id} className="rounded-xl border border-gray-700 bg-gray-900/60 p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm text-gray-400">Zone</p>
+                        <p className="font-semibold text-white break-all">{zone.zone_id}</p>
+                      </div>
+                      <span className="rounded-full bg-red-500/15 px-2 py-1 text-xs font-medium text-red-300">
+                        {zone.projected_claims_next_week.toFixed(1)} claims
+                      </span>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-300">
+                      <div className="flex items-center justify-between">
+                        <span>Active policies</span>
+                        <span className="font-medium text-white">{zone.active_policy_count}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Expected disruption days</span>
+                        <span className="font-medium text-white">{zone.expected_disruption_days.toFixed(1)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Expected severity</span>
+                        <span className="font-medium text-white">{severityPercent}%</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Projected payout</span>
+                        <span className="font-medium text-white">{formatCurrency(zone.projected_payout_next_week)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Forecast confidence</span>
+                        <span className="font-medium text-white">{formatPercentage(zone.forecast_confidence)}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <Brain className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p>No forecast data yet</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-gray-800 border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-white">7-Day Zone Forecast</CardTitle>
+          <CardDescription className="text-gray-400">
+            Daily signal pressure for the highest-risk active zone.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {topZoneForecast?.forecast && topZoneForecast.forecast.length > 0 ? (
+            <div className="overflow-x-auto">
+              <div className="grid min-w-[840px] grid-cols-7 gap-3">
+                {topZoneForecast.forecast.map((day) => {
+                  const severityPercent = Math.round(day.projected_severity * 100);
+                  return (
+                    <div key={`${day.zone_id}-${day.forecast_date}`} className="rounded-xl border border-gray-700 bg-gray-900/60 p-3 space-y-2">
+                      <div>
+                        <p className="text-xs text-gray-400">{day.forecast_date}</p>
+                        <p className="text-sm font-semibold text-white">Day {day.day_offset + 1}</p>
+                      </div>
+                      <div className="text-xs text-gray-300 space-y-1">
+                        <div className="flex items-center justify-between gap-2"><span>Pressure</span><span className="text-white font-medium">{Math.round(day.signal_pressure * 100)}%</span></div>
+                        <div className="flex items-center justify-between gap-2"><span>Rain</span><span className="text-white font-medium">{day.precipitation_sum_mm.toFixed(1)} mm</span></div>
+                        <div className="flex items-center justify-between gap-2"><span>Wind</span><span className="text-white font-medium">{day.windspeed_10m_max_kph.toFixed(1)} kph</span></div>
+                        <div className="flex items-center justify-between gap-2"><span>Severity</span><span className="text-white font-medium">{severityPercent}%</span></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-6 text-gray-500">
+              <Brain className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p>No 7-day forecast available yet</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Flagged Claims Table */}
       <Card className="bg-gray-800 border-gray-700">
         <CardHeader className="flex flex-row items-center justify-between">
@@ -209,38 +351,40 @@ export default function AdminDashboardPage() {
         </CardHeader>
         <CardContent>
           {flaggedClaims && flaggedClaims.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow className="border-gray-700">
-                  <TableHead className="text-gray-400">Claim ID</TableHead>
-                  <TableHead className="text-gray-400">Worker</TableHead>
-                  <TableHead className="text-gray-400">Payout</TableHead>
-                  <TableHead className="text-gray-400">Status</TableHead>
-                  <TableHead className="text-gray-400">Reason</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {flaggedClaims?.map((claim) => (
-                  <TableRow key={claim.id || Math.random()} className="border-gray-700">
-                    <TableCell className="text-gray-300 font-mono text-sm">
-                      {claim.id?.slice(0, 8) || 'N/A'}...
-                    </TableCell>
-                    <TableCell className="text-gray-300">
-                      {claim.worker_name || 'Worker'}
-                    </TableCell>
-                    <TableCell className="text-gray-300">
-                      {formatCurrency(claim.payout_amount || 0)}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={claim.status} />
-                    </TableCell>
-                    <TableCell className="text-gray-400 text-sm max-w-[200px] truncate">
-                      {claim.audit_reason || 'Low BAF score'}
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table className="min-w-[720px]">
+                <TableHeader>
+                  <TableRow className="border-gray-700">
+                    <TableHead className="text-gray-400">Claim ID</TableHead>
+                    <TableHead className="text-gray-400">Worker</TableHead>
+                    <TableHead className="text-gray-400">Payout</TableHead>
+                    <TableHead className="text-gray-400">Status</TableHead>
+                    <TableHead className="text-gray-400">Reason</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {flaggedClaims?.map((claim) => (
+                    <TableRow key={claim.id || Math.random()} className="border-gray-700">
+                      <TableCell className="text-gray-300 font-mono text-sm">
+                        {claim.id?.slice(0, 8) || 'N/A'}...
+                      </TableCell>
+                      <TableCell className="text-gray-300">
+                        {claim.worker_name || 'Worker'}
+                      </TableCell>
+                      <TableCell className="text-gray-300">
+                        {formatCurrency(claim.payout_amount || 0)}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={claim.status} />
+                      </TableCell>
+                      <TableCell className="text-gray-400 text-sm max-w-[200px] truncate">
+                        {claim.audit_reason || 'Low BAF score'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
               <AlertTriangle className="h-8 w-8 mx-auto mb-2 opacity-50" />

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from models.claim import Claim
 from models.worker import Worker
 from services import baseline_engine, risk_model
+from services.intelligence_signals import get_zone_intelligence_snapshot
 
 
 _COVERAGE_TIERS = {
@@ -16,17 +17,22 @@ _COVERAGE_TIERS = {
 }
 
 _ZONE_RISK_INDEX = {
-    "high_risk": 1.4,
-    "medium_risk": 1.1,
-    "low_risk": 0.9,
+    "high_risk": 1.08,
+    "medium_risk": 1.02,
+    "low_risk": 0.98,
 }
 
 _PLATFORM_VOLATILITY = {
-    "swiggy": 1.1,
-    "zomato": 1.1,
+    "swiggy": 1.02,
+    "zomato": 1.02,
     "amazon": 1.0,
-    "zepto": 1.2,
+    "zepto": 1.04,
 }
+
+# Calibration knobs: aggressive reduction for affordable Indian market pricing
+_DISRUPTION_LOSS_REALIZATION = 0.15
+_RISK_AMPLIFICATION_WEIGHT = 0.05
+_BASE_LOADING_FACTOR = 0.06
 
 
 def _zone_risk_bucket(micro_zone_id: str) -> str:
@@ -54,36 +60,62 @@ def calculate_premium(worker: Worker, coverage_tier: str, db: Session) -> dict:
 
     baseline_result = baseline_engine.compute_baseline_income(worker=worker, db=db)
     baseline_income = float(baseline_result.get("baseline_income", 0.0))
+    intelligence = get_zone_intelligence_snapshot(worker.micro_zone_id)
+    intelligence_pressure = float(intelligence.get("signal_pressure", 0.0))
+    projected_weekly_income = max(baseline_income * (1.0 - (intelligence_pressure * 0.18)), 0.0)
 
     risk = risk_model.estimate_weekly_risk(zone_id=worker.micro_zone_id, db=db)
-    expected_disruption_days = max(float(risk["expected_disruption_days"]), 1.2)
-    expected_severity_per_day = max(float(risk["expected_severity"]), 0.40)
+    expected_disruption_days = _clamp(float(risk.get("expected_disruption_days", 0.0)), 0.0, 7.0)
+    expected_severity_per_day = _clamp(float(risk.get("expected_severity", 0.0)), 0.0, 1.0)
+    disruption_week_fraction = _clamp(expected_disruption_days / 7.0, 0.0, 1.0)
     
-    # Expected loss is proportional to coverage ratio (higher coverage = more potential payout)
+    # Expected loss must use disruption-days as a fraction of the week, not a direct multiplier.
     expected_loss = min(
-        baseline_income * expected_disruption_days * expected_severity_per_day * coverage_ratio,
+        projected_weekly_income
+        * disruption_week_fraction
+        * expected_severity_per_day
+        * coverage_ratio
+        * _DISRUPTION_LOSS_REALIZATION,
         max_weekly_coverage,
     )
 
     zone_bucket = _zone_risk_bucket(worker.micro_zone_id)
     zone_risk_index = _ZONE_RISK_INDEX[zone_bucket]
     platform_key = worker.platform.value.lower()
-    platform_volatility_index = _PLATFORM_VOLATILITY.get(platform_key, 1.1)
-    risk_multiplier = min(zone_risk_index * platform_volatility_index, 2.0)
+    platform_volatility_index = _PLATFORM_VOLATILITY.get(platform_key, 1.02)
+    signal_loading = 1.0 + (intelligence_pressure * 0.08)
+    risk_multiplier = min(zone_risk_index * platform_volatility_index * signal_loading, 1.5)
+    # Expected loss already contains disruption-risk estimates, so use a damped risk adjustment here
+    # to avoid counting the same risk signal twice.
+    damped_risk_multiplier = 1.0 + ((risk_multiplier - 1.0) * _RISK_AMPLIFICATION_WEIGHT)
 
-    trust_discount = 1.0 - (float(worker.trust_score) - 0.6) * 0.1
-    trust_discount = _clamp(trust_discount, 0.94, 1.06)
+    # Trust adjustment: discount for high trust (>0.6), penalty for low trust (<0.6)
+    # trust_score ranges from 0.1 to 1.0, neutral point is 0.6
+    trust_adjustment = 1.0 + (0.6 - float(worker.trust_score)) * 0.25
+    trust_adjustment = _clamp(trust_adjustment, 0.80, 1.20)
 
-    loading_factor = 0.35
-    # Premium is based on expected_loss directly (higher coverage = higher premium)
-    weekly_premium = expected_loss * (1.0 + loading_factor) * risk_multiplier * trust_discount
+    loading_factor = _BASE_LOADING_FACTOR
+    weekly_premium = expected_loss * (1.0 + loading_factor) * damped_risk_multiplier * trust_adjustment
+
+    # Income-based affordability cap
+    max_affordable_rates = {
+        "basic": 0.025,
+        "standard": 0.065,
+        "premium": 0.115,
+    }
+    income_based_cap = projected_weekly_income * max_affordable_rates[tier_key]
+    weekly_premium = min(weekly_premium, income_based_cap)
 
     return {
         "weekly_premium": round(max(weekly_premium, 0.0), 2),
         "expected_loss": round(max(expected_loss, 0.0), 2),
+        "projected_weekly_income": round(projected_weekly_income, 2),
+        "intelligence_pressure": round(intelligence_pressure, 3),
         "loading_factor": loading_factor,
         "risk_multiplier": round(risk_multiplier, 3),
-        "trust_discount": round(trust_discount, 3),
+        # Keep backward-compatible key used by API schema/routes/frontend.
+        "trust_discount": round(trust_adjustment, 3),
+        "trust_adjustment": round(trust_adjustment, 3),
         "coverage_ratio": coverage_ratio,
         "max_weekly_coverage": max_weekly_coverage,
     }

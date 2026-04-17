@@ -12,6 +12,16 @@ export function useDisruptions(zoneId: string | null) {
   });
 }
 
+export function useClaimableDisruptions(zoneId: string | null) {
+  return useQuery({
+    queryKey: ['disruptions', 'claimable', zoneId],
+    queryFn: () => triggersApi.getClaimable(zoneId!),
+    enabled: !!zoneId,
+    refetchInterval: 30 * 1000,
+    staleTime: 10 * 1000,
+  });
+}
+
 export function useSimulateDisruption() {
   const queryClient = useQueryClient();
 

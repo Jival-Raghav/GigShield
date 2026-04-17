@@ -34,6 +34,19 @@ export interface WorkerUpdate {
   upi_id?: string;
 }
 
+export interface WorkerLocationTraceCreate {
+  latitude: number;
+  longitude: number;
+  accuracy_meters?: number;
+  source?: string;
+}
+
+export interface WorkerLocationTraceResponse {
+  mapped_parent_zone_id?: string | null;
+  mapped_fine_zone_id?: string | null;
+  accepted: boolean;
+}
+
 // Policy Types
 export interface Policy {
   id: string;
@@ -58,6 +71,8 @@ export interface PolicyCreate {
 export interface PremiumQuote {
   weekly_premium: number;
   expected_loss: number;
+  projected_weekly_income?: number;
+  intelligence_pressure?: number;
   loading_factor: number;
   risk_multiplier: number;
   trust_discount: number;
@@ -122,6 +137,13 @@ export interface Claim {
   syndicate_flag: boolean;
   audit_required: boolean;
   audit_reason: string | null;
+  fraud_score?: number;
+  fraud_band?: 'low' | 'medium' | 'high';
+  fraud_explanation?: string | null;
+  fraud_explanation_confidence?: number | null;
+  fraud_explanation_source?: string | null;
+  fraud_component_scores?: Record<string, number> | null;
+  fraud_top_reasons?: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -130,6 +152,10 @@ export interface ClaimCreate {
   worker_id: string;
   policy_id: string;
   disruption_id: string;
+  latitude?: number;
+  longitude?: number;
+  accuracy_meters?: number;
+  ip_address?: string;
 }
 
 export interface ClaimStatusUpdate {
@@ -139,6 +165,7 @@ export interface ClaimStatusUpdate {
 
 // Payout Types
 export type PaymentStatus = 'initiated' | 'processing' | 'completed' | 'failed';
+export type PayoutGateway = 'upi_simulator' | 'razorpay_test' | 'stripe_sandbox';
 
 export interface Payout {
   id: string;
@@ -174,6 +201,8 @@ export interface LoginResponse {
   expires_at: string;
   worker_id: string;
   is_admin: boolean;
+  phone: string;
+  display_name: string;
 }
 
 // Admin Types
@@ -185,6 +214,128 @@ export interface AdminDashboard {
   active_disruptions: number;
   avg_baf_score: number;
   loss_ratio: number;
+  projected_claims_next_week?: number;
+  projected_payout_next_week?: number;
+  forecast_confidence?: number;
+  top_risk_zone?: string | null;
+  top_risk_zone_projected_claims?: number;
+  top_risk_zone_projected_payout?: number;
+  top_risk_zones?: Array<{
+    zone_id: string;
+    active_policy_count: number;
+    expected_disruption_days: number;
+    expected_severity: number;
+    projected_claims_next_week: number;
+    projected_payout_next_week: number;
+    forecast_confidence: number;
+  }>;
+  zone_forecast_7d?: Array<{
+    zone_id: string;
+    forecast: Array<{
+      zone_id: string;
+      forecast_date: string;
+      day_offset: number;
+      signal_pressure: number;
+      holiday_active: boolean;
+      windspeed_10m_max_kph: number;
+      precipitation_sum_mm: number;
+      news_risk: number;
+      fire_risk: number;
+      projected_disruption_days: number;
+      projected_severity: number;
+      forecast_confidence: number;
+    }>;
+  }>;
+}
+
+export interface FraudClusterSummary {
+  cluster_id: string;
+  size: number;
+  avg_trust_score: number;
+  avg_baf_score: number;
+  avg_audit_rate: number;
+  avg_negative_rate: number;
+  avg_claim_frequency: number;
+  suspicious_claim_ratio: number;
+  cluster_score: number;
+  behavior_label: string;
+  top_zones: string[];
+  top_worker_names: string[];
+  top_reasons: string[];
+}
+
+export interface FraudClusterZone {
+  zone_id: string;
+  parent_zone_id: string;
+  worker_count: number;
+  claim_count: number;
+  suspicious_claim_count: number;
+  suspicious_claim_ratio: number;
+  avg_trust_score: number;
+  avg_fraud_score: number;
+  dominant_cluster: string;
+  cluster_size: number;
+}
+
+export interface FraudClusterMapResponse {
+  generated_at: string;
+  total_workers: number;
+  total_claims: number;
+  clusters: FraudClusterSummary[];
+  zones: FraudClusterZone[];
+}
+
+export interface ClaimTimelineEvent {
+  timestamp: string | null;
+  category: string;
+  title: string;
+  details: string;
+}
+
+export interface ClaimTimelineResponse {
+  claim_id: string;
+  worker_id: string;
+  zone_id: string;
+  fraud_score: number;
+  fraud_band: 'low' | 'medium' | 'high';
+  timeline: ClaimTimelineEvent[];
+}
+
+export interface ClaimScenarioInput {
+  rainfall_mm?: number | null;
+  aqi?: number | null;
+  curfew_level?: string | null;
+  worker_movement?: string | null;
+  gps_zone?: string | null;
+  ip_zone?: string | null;
+  wind_speed_kph?: number | null;
+  disruption_severity?: number | null;
+  external_pressure?: number | null;
+}
+
+export interface ClaimScenarioResult {
+  claim_id: string;
+  base: {
+    fraud_score: number;
+    fraud_band: 'low' | 'medium' | 'high';
+    payout_amount: number;
+  };
+  scenario: {
+    fraud_score: number;
+    fraud_band: 'low' | 'medium' | 'high';
+    payout_amount: number;
+    payout_income_lost: number;
+    eligible_hours: number;
+    severity_smoothed: number;
+    audit_required: boolean;
+    top_reasons: string[];
+    explanation: string;
+  };
+  delta: {
+    fraud_score: number;
+    payout_amount: number;
+  };
+  error?: string;
 }
 
 export interface FlaggedClaim extends Claim {

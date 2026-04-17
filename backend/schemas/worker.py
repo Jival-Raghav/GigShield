@@ -25,6 +25,19 @@ class WorkerUpdate(BaseModel):
     upi_id: str | None = None
 
 
+class WorkerLocationTraceCreate(BaseModel):
+    latitude: float
+    longitude: float
+    accuracy_meters: float | None = None
+    source: str | None = "browser_periodic"
+
+
+class WorkerLocationTraceResponse(BaseModel):
+    mapped_parent_zone_id: str | None
+    mapped_fine_zone_id: str | None
+    accepted: bool
+
+
 class WorkerResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

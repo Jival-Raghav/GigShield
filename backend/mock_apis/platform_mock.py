@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 import hashlib
 import random
 from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
 
 
 def _seeded_rng(zone_id: str) -> random.Random:
@@ -14,6 +17,7 @@ def _seeded_rng(zone_id: str) -> random.Random:
 
 def get_platform_status(zone_id: str) -> dict:
     """Return mock platform health snapshot for a zone."""
+    logger.warning("Using mock platform outage data for zone %s.", zone_id)
     rng = _seeded_rng(zone_id)
     uptime_percent = round(rng.uniform(90.0, 100.0), 2)
     api_error_rate = round(rng.uniform(0.0, 0.25), 3)

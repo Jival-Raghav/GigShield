@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AxiosError } from 'axios';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBaseline, usePremiumQuote, useCreatePolicy } from '@/hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -76,6 +77,25 @@ export default function PremiumPage() {
   const [selectedTier, setSelectedTier] = useState<CoverageTier | null>(null);
   const [loadingTier, setLoadingTier] = useState<CoverageTier | null>(null);
 
+  const extractErrorMessage = (error: unknown, fallback: string): string => {
+    if (error instanceof AxiosError) {
+      const apiDetail = (error.response?.data as { detail?: unknown } | undefined)?.detail;
+      if (typeof apiDetail === 'string' && apiDetail.trim().length > 0) {
+        return apiDetail;
+      }
+      if (Array.isArray(apiDetail) && apiDetail.length > 0) {
+        return String(apiDetail[0]);
+      }
+      if (error.message) {
+        return error.message;
+      }
+    }
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+    return fallback;
+  };
+
   const handleGetQuote = async (tier: CoverageTier) => {
     if (!worker) return;
     
@@ -88,8 +108,8 @@ export default function PremiumPage() {
       setQuotes((prev) => ({ ...prev, [tier]: quote }));
       setSelectedTier(tier);
       toast.success(`${tier.charAt(0).toUpperCase() + tier.slice(1)} tier quote ready!`);
-    } catch {
-      toast.error('Failed to get quote. Please try again.');
+    } catch (error) {
+      toast.error(extractErrorMessage(error, 'Failed to get quote. Please try again.'));
     } finally {
       setLoadingTier(null);
     }
@@ -100,16 +120,41 @@ export default function PremiumPage() {
     
     setLoadingTier('basic');
     try {
-      const [basic, standard, premium] = await Promise.all([
+      const results = await Promise.allSettled([
         premiumQuoteMutation.mutateAsync({ worker_id: worker.id, coverage_tier: 'basic' }),
         premiumQuoteMutation.mutateAsync({ worker_id: worker.id, coverage_tier: 'standard' }),
         premiumQuoteMutation.mutateAsync({ worker_id: worker.id, coverage_tier: 'premium' }),
       ]);
-      setQuotes({ basic, standard, premium });
-      setSelectedTier('standard');
-      toast.success('All quotes ready!');
-    } catch {
-      toast.error('Failed to get quotes');
+
+      const [basicResult, standardResult, premiumResult] = results;
+      const nextQuotes: Record<CoverageTier, PremiumQuote | null> = {
+        basic: basicResult.status === 'fulfilled' ? basicResult.value : null,
+        standard: standardResult.status === 'fulfilled' ? standardResult.value : null,
+        premium: premiumResult.status === 'fulfilled' ? premiumResult.value : null,
+      };
+      setQuotes(nextQuotes);
+
+      if (nextQuotes.standard) {
+        setSelectedTier('standard');
+      } else if (nextQuotes.basic) {
+        setSelectedTier('basic');
+      } else if (nextQuotes.premium) {
+        setSelectedTier('premium');
+      }
+
+      const failureReasons = results
+        .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+        .map((result) => extractErrorMessage(result.reason, 'Quote request failed'));
+
+      if (failureReasons.length === 0) {
+        toast.success('All quotes ready!');
+      } else if (failureReasons.length < 3) {
+        toast.error(`Some quotes failed: ${failureReasons.join(' | ')}`);
+      } else {
+        toast.error(`Failed to get quotes: ${failureReasons.join(' | ')}`);
+      }
+    } catch (error) {
+      toast.error(extractErrorMessage(error, 'Failed to get quotes'));
     } finally {
       setLoadingTier(null);
     }
@@ -125,8 +170,8 @@ export default function PremiumPage() {
       });
       toast.success('Policy created successfully!');
       router.push('/policies');
-    } catch {
-      toast.error('Failed to create policy');
+    } catch (error) {
+      toast.error(extractErrorMessage(error, 'Failed to create policy'));
     }
   };
 

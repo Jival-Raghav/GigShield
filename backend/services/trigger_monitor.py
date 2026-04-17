@@ -18,7 +18,7 @@ from models.claim import Claim, ClaimStatusEnum
 from models.disruption import Disruption
 from models.policy import Policy
 from models.worker import Worker
-from services.claim_processing import evaluate_and_assign_claim
+from services.claim_processing import evaluate_and_assign_claim, try_auto_pay_claim
 
 
 def _severity(value: float) -> float:
@@ -134,6 +134,9 @@ async def check_all_triggers(zone_id: str, db: Session) -> list[dict]:
 
 async def auto_initiate_claims(disruption: Disruption, db: Session) -> int:
     """Auto-create pending claims for workers in disruption zone with active policy."""
+    if disruption.ended_at is None:
+        return 0
+
     workers = db.query(Worker).filter(Worker.micro_zone_id == disruption.zone_id).all()
     initiated = 0
 
@@ -174,6 +177,8 @@ async def auto_initiate_claims(disruption: Disruption, db: Session) -> int:
             db=db,
         )
         db.add(claim)
+        db.flush()
+        try_auto_pay_claim(claim=claim, policy=policy, db=db, reference_prefix="AUTO-END")
         initiated += 1
 
     db.commit()

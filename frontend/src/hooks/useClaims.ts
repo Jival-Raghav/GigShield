@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { claimsApi, payoutsApi } from '@/lib/api';
-import type { ClaimCreate, ClaimStatusUpdate } from '@/types';
+import type { ClaimCreate, ClaimStatusUpdate, PayoutGateway } from '@/types';
 
 export function useClaims(workerId: string | null) {
   return useQuery({
@@ -49,7 +49,12 @@ export function useInitiatePayout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (claimId: string) => payoutsApi.initiate(claimId),
+    mutationFn: (payload: string | { claimId: string; gateway?: PayoutGateway }) => {
+      if (typeof payload === 'string') {
+        return payoutsApi.initiate(payload);
+      }
+      return payoutsApi.initiate(payload.claimId, payload.gateway ?? 'upi_simulator');
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['admin'] });

@@ -27,6 +27,8 @@ import {
   AlertTriangle,
   ArrowRight,
   Settings,
+  ShieldCheck,
+  Brain,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -51,6 +53,16 @@ export default function DashboardPage() {
   const activeDisruptions = disruptions || [];
   const pendingClaims = claims?.filter((c) => ['pending', 'validating', 'held'].includes(c.status)) || [];
   const totalPayout = claims?.reduce((sum, c) => sum + (c.status === 'paid' ? c.payout_amount : 0), 0) || 0;
+  const protectedEarnings = activePolicy && worker
+    ? Math.min(worker.avg_weekly_income * activePolicy.coverage_ratio, activePolicy.max_weekly_coverage)
+    : 0;
+  const weeklyCoverage = activePolicy?.max_weekly_coverage || 0;
+  const coverageRatio = activePolicy?.coverage_ratio || 0;
+  const coverageStatus = activePolicy
+    ? activeDisruptions.length > 0
+      ? 'Coverage active during disruptions'
+      : 'Coverage active and standing by'
+    : 'No active coverage yet';
 
   return (
     <div className="space-y-6">
@@ -128,6 +140,71 @@ export default function DashboardPage() {
           iconColor="bg-purple-100 text-purple-600"
         />
       </div>
+
+      {/* Protection Intelligence */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Earnings Protected"
+          value={formatCurrency(protectedEarnings)}
+          description="Your covered weekly earnings estimate"
+          icon={ShieldCheck}
+          iconColor="bg-emerald-100 text-emerald-600"
+        />
+        <StatCard
+          title="Active Weekly Coverage"
+          value={formatCurrency(weeklyCoverage)}
+          description={coverageStatus}
+          icon={Wallet}
+          iconColor="bg-blue-100 text-blue-600"
+        />
+        <StatCard
+          title="Coverage Ratio"
+          value={formatPercentage(coverageRatio)}
+          description={activePolicy ? `${activePolicy.coverage_tier} plan` : 'Upgrade to protect more income'}
+          icon={TrendingUp}
+          iconColor="bg-violet-100 text-violet-600"
+        />
+        <StatCard
+          title="Claim Watch"
+          value={activeDisruptions.length > 0 ? 'High' : 'Normal'}
+          description={activeDisruptions.length > 0 ? `${activeDisruptions.length} disruptions near your zone` : 'No active zone threats'}
+          icon={Brain}
+          iconColor="bg-amber-100 text-amber-600"
+        />
+      </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <div>
+            <CardTitle className="text-lg">Protection Snapshot</CardTitle>
+            <CardDescription>Current coverage and claim outlook</CardDescription>
+          </div>
+          <Link href="/premium">
+            <Button variant="ghost" size="sm">
+              Get More Coverage
+            </Button>
+          </Link>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="rounded-lg border bg-gray-50 p-4">
+              <p className="text-sm text-gray-500">Protected earnings</p>
+              <p className="mt-1 text-xl font-bold text-gray-900">{formatCurrency(protectedEarnings)}</p>
+              <p className="text-xs text-gray-500 mt-1">Estimate based on your active policy</p>
+            </div>
+            <div className="rounded-lg border bg-gray-50 p-4">
+              <p className="text-sm text-gray-500">Active weekly coverage</p>
+              <p className="mt-1 text-xl font-bold text-gray-900">{formatCurrency(weeklyCoverage)}</p>
+              <p className="text-xs text-gray-500 mt-1">Maximum claim protection this week</p>
+            </div>
+            <div className="rounded-lg border bg-gray-50 p-4">
+              <p className="text-sm text-gray-500">Weekly claim outlook</p>
+              <p className="mt-1 text-xl font-bold text-gray-900">{activeDisruptions.length > 0 ? 'Watch' : 'Stable'}</p>
+              <p className="text-xs text-gray-500 mt-1">Based on current zone disruptions</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

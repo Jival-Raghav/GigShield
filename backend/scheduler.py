@@ -35,15 +35,33 @@ def _current_week_range(now: datetime) -> tuple[datetime, datetime]:
 
 
 async def poll_all_zones() -> None:
-    """Poll all active zones and create disruptions/claims for newly triggered events."""
+    """Poll all active zones, update disruption lifecycle, and create claims on disruption end."""
     db: Session = SessionLocal()
     try:
         zone_rows = db.query(Worker.micro_zone_id).distinct().all()
         zone_ids = [row[0] for row in zone_rows if row[0]]
 
         for zone_id in zone_ids:
-            disruptions = await trigger_monitor.check_all_triggers(zone_id=zone_id, db=db)
-            for item in disruptions:
+            now = datetime.now(timezone.utc)
+            active_payloads = await trigger_monitor.check_all_triggers(zone_id=zone_id, db=db)
+            active_types = {item["disruption_type"] for item in active_payloads}
+
+            active_records = (
+                db.query(Disruption)
+                .filter(Disruption.zone_id == zone_id, Disruption.ended_at.is_(None))
+                .all()
+            )
+
+            for record in active_records:
+                if record.disruption_type.value in active_types:
+                    continue
+                record.ended_at = now
+                db.add(record)
+                db.commit()
+                db.refresh(record)
+                await trigger_monitor.auto_initiate_claims(disruption=record, db=db)
+
+            for item in active_payloads:
                 existing = (
                     db.query(Disruption)
                     .filter(
@@ -64,12 +82,11 @@ async def poll_all_zones() -> None:
                     is_confirmed=True,
                     is_catastrophic=item.get("is_catastrophic", False),
                     started_at=item.get("started_at") or datetime.now(timezone.utc),
-                    ended_at=item.get("ended_at"),
+                    ended_at=None,
                 )
                 db.add(disruption)
                 db.commit()
                 db.refresh(disruption)
-                await trigger_monitor.auto_initiate_claims(disruption=disruption, db=db)
     except Exception:
         logger.exception("Scheduler poll_all_zones failed")
     finally:

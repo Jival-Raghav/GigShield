@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useFlaggedClaims, useAdminUpdateClaimStatus, useInitiatePayout } from '@/hooks';
+import { useFlaggedClaims, useAdminUpdateClaimStatus, useInitiatePayout, useClaimTimeline } from '@/hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@ import {
   DashboardSkeleton,
   ErrorState,
 } from '@/components/common';
-import { 
+import {
   AlertTriangle,
   CheckCircle,
   XCircle,
@@ -40,15 +40,16 @@ import {
   Shield,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Claim, ClaimStatus } from '@/types';
+import type { ClaimStatus, FlaggedClaim, PayoutGateway } from '@/types';
 
 export default function AdminClaimsPage() {
   const { data: claims, isLoading, error, refetch } = useFlaggedClaims(100, 0);
-  const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
+  const [selectedClaim, setSelectedClaim] = useState<FlaggedClaim | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  
+  const [selectedGateway, setSelectedGateway] = useState<PayoutGateway>('upi_simulator');
   const updateStatusMutation = useAdminUpdateClaimStatus();
   const payoutMutation = useInitiatePayout();
+  const { data: claimTimeline } = useClaimTimeline(selectedClaim?.id || null);
 
   const handleUpdateStatus = async (claimId: string, status: ClaimStatus) => {
     setActionLoading(claimId);
@@ -67,7 +68,7 @@ export default function AdminClaimsPage() {
   const handleInitiatePayout = async (claimId: string) => {
     setActionLoading(claimId);
     try {
-      await payoutMutation.mutateAsync(claimId);
+      await payoutMutation.mutateAsync({ claimId, gateway: selectedGateway });
       toast.success('Payout initiated successfully!');
       refetch();
     } catch {
@@ -82,121 +83,136 @@ export default function AdminClaimsPage() {
   }
 
   if (error) {
-    return <ErrorState onRetry={() => refetch()} />;
+    return (
+      <ErrorState
+        title="Unable to load flagged claims"
+        description="Please try again."
+        onRetry={() => {
+          refetch();
+        }}
+      />
+    );
   }
+
+  const list = claims ?? [];
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Flagged Claims</h1>
-          <p className="text-gray-400 mt-1">Review and process claims requiring manual audit</p>
-        </div>
-        <Button variant="outline" onClick={() => refetch()} className="border-gray-600 text-gray-300 hover:bg-gray-700">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
-        </Button>
-      </div>
+      <Card className="bg-gray-800 border-gray-700">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle className="text-white">Flagged Claims</CardTitle>
+            <CardDescription className="text-gray-400">
+              Manual review queue for suspicious and audit-required claims.
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              refetch();
+            }}
+            className="border-gray-600 bg-transparent text-gray-200 hover:bg-gray-700"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+        </CardHeader>
+      </Card>
 
-      {claims && claims.length > 0 ? (
+      {list.length > 0 ? (
         <Card className="bg-gray-800 border-gray-700">
           <CardContent className="pt-6">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-gray-700">
-                  <TableHead className="text-gray-400">Claim ID</TableHead>
-                  <TableHead className="text-gray-400">Worker</TableHead>
-                  <TableHead className="text-gray-400">Zone</TableHead>
-                  <TableHead className="text-gray-400">Payout</TableHead>
-                  <TableHead className="text-gray-400">BAF Score</TableHead>
-                  <TableHead className="text-gray-400">Status</TableHead>
-                  <TableHead className="text-gray-400">Reason</TableHead>
-                  <TableHead className="text-gray-400 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {claims?.map((claim) => (
-                  <TableRow key={claim.id || Math.random()} className="border-gray-700">
-                    <TableCell className="text-gray-300 font-mono text-sm">
-                      {claim.id?.slice(0, 8) || 'N/A'}...
-                    </TableCell>
-                    <TableCell className="text-gray-300">
-                      {claim.worker_name || 'Worker'}
-                    </TableCell>
-                    <TableCell className="text-gray-400 text-sm">
-                      {claim.zone_id || 'N/A'}
-                    </TableCell>
-                    <TableCell className="text-white font-medium">
-                      {formatCurrency(claim.payout_amount || 0)}
-                    </TableCell>
-                    <TableCell>
-                      <BAFScoreBadge score={claim.baf_score || 0} />
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={claim.status} />
-                    </TableCell>
-                    <TableCell className="text-gray-400 text-sm max-w-[150px] truncate">
-                      {claim.audit_reason || 'Low BAF'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedClaim(claim)}
-                          className="text-gray-400 hover:text-white"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {(claim.status === 'pending' || claim.status === 'held' || claim.status === 'validating') && claim.id && (
-                          <>
+            <div className="rounded-md border border-gray-700">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-gray-700 hover:bg-transparent">
+                    <TableHead className="text-gray-300">Claim</TableHead>
+                    <TableHead className="text-gray-300">Worker</TableHead>
+                    <TableHead className="text-gray-300">Zone</TableHead>
+                    <TableHead className="text-gray-300">BAF</TableHead>
+                    <TableHead className="text-gray-300">Fraud</TableHead>
+                    <TableHead className="text-gray-300">Payout</TableHead>
+                    <TableHead className="text-gray-300">Status</TableHead>
+                    <TableHead className="text-right text-gray-300">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {list.map((claim) => (
+                    <TableRow key={claim.id} className="border-gray-700 hover:bg-gray-700/20">
+                      <TableCell className="text-xs text-gray-200">{claim.id.slice(0, 8)}...</TableCell>
+                      <TableCell className="text-sm text-gray-200">{claim.worker_name || claim.worker_id.slice(0, 8)}</TableCell>
+                      <TableCell className="text-sm text-gray-300">{claim.zone_id || '-'}</TableCell>
+                      <TableCell>
+                        <BAFScoreBadge score={claim.baf_score} />
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-200">{Math.round(claim.fraud_score || 0)}/100</TableCell>
+                      <TableCell className="text-sm text-gray-200">{formatCurrency(claim.payout_amount)}</TableCell>
+                      <TableCell>
+                        <StatusBadge status={claim.status} />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSelectedClaim(claim)}
+                            className="border-gray-600 bg-transparent text-gray-200 hover:bg-gray-700"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          {claim.status === 'held' && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  handleUpdateStatus(claim.id, 'approved');
+                                }}
+                                disabled={actionLoading === claim.id}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                {actionLoading === claim.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <CheckCircle className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  handleUpdateStatus(claim.id, 'rejected');
+                                }}
+                                disabled={actionLoading === claim.id}
+                                className="border-red-500 text-red-400 hover:bg-red-500/20"
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          {claim.status === 'approved' && (
                             <Button
-                              variant="ghost"
                               size="sm"
-                              onClick={() => handleUpdateStatus(claim.id, 'approved')}
+                              onClick={() => {
+                                handleInitiatePayout(claim.id);
+                              }}
                               disabled={actionLoading === claim.id}
-                              className="text-green-400 hover:text-green-300 hover:bg-green-500/20"
-                              title="Approve"
+                              className="bg-purple-600 hover:bg-purple-700"
                             >
                               {actionLoading === claim.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
-                                <CheckCircle className="h-4 w-4" />
+                                <Wallet className="h-4 w-4" />
                               )}
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleUpdateStatus(claim.id, 'rejected')}
-                              disabled={actionLoading === claim.id}
-                              className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
-                              title="Reject"
-                            >
-                              <XCircle className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                        {claim.status === 'approved' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleInitiatePayout(claim.id)}
-                            disabled={actionLoading === claim.id}
-                            className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/20"
-                          >
-                            {actionLoading === claim.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Wallet className="h-4 w-4" />
-                            )}
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       ) : (
@@ -211,35 +227,28 @@ export default function AdminClaimsPage() {
         </Card>
       )}
 
-      {/* Claim Detail Modal */}
       <Dialog open={!!selectedClaim} onOpenChange={(open) => !open && setSelectedClaim(null)}>
-        <DialogContent className="max-w-lg bg-gray-800 border-gray-700 text-white">
+        <DialogContent className="max-w-3xl bg-gray-800 border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Claim Review</DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Claim ID: {selectedClaim?.id}
-            </DialogDescription>
+            <DialogDescription className="text-gray-400">Claim ID: {selectedClaim?.id}</DialogDescription>
           </DialogHeader>
           {selectedClaim && (
             <div className="space-y-6">
-              {/* Status & Payout */}
               <div className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-400">Payout Amount</p>
-                  <p className="text-2xl font-bold text-white">
-                    {formatCurrency(selectedClaim.payout_amount)}
-                  </p>
+                  <p className="text-2xl font-bold text-white">{formatCurrency(selectedClaim.payout_amount)}</p>
                 </div>
                 <StatusBadge status={selectedClaim.status} />
               </div>
 
-              {/* BAF Details */}
               <div className="space-y-3">
                 <h4 className="font-medium text-white flex items-center gap-2">
                   <Shield className="h-4 w-4 text-blue-400" />
-                  Fraud Analysis
+                  Fraud Intelligence
                 </h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-2 gap-3 text-sm lg:grid-cols-3">
                   <div className="p-3 bg-gray-700 rounded">
                     <p className="text-gray-400">BAF Score</p>
                     <p className="font-medium text-white">{formatPercentage(selectedClaim.baf_score)}</p>
@@ -256,10 +265,29 @@ export default function AdminClaimsPage() {
                     <p className="text-gray-400">Spoofing Signals</p>
                     <p className="font-medium text-white">{selectedClaim.spoofing_signals_fired}</p>
                   </div>
+                  <div className="p-3 bg-gray-700 rounded">
+                    <p className="text-gray-400">Fraud Score</p>
+                    <p className="font-medium text-white">{Math.round(selectedClaim.fraud_score || 0)}/100</p>
+                  </div>
+                  <div className="p-3 bg-gray-700 rounded">
+                    <p className="text-gray-400">Risk Band</p>
+                    <p className="font-medium text-white uppercase">{selectedClaim.fraud_band || 'low'}</p>
+                  </div>
+                  <div className="p-3 bg-gray-700 rounded">
+                    <p className="text-gray-400">Unified Confidence</p>
+                    <p className="font-medium text-white">{formatPercentage(selectedClaim.unified_confidence)}</p>
+                  </div>
+                  <div className="p-3 bg-gray-700 rounded">
+                    <p className="text-gray-400">Explanation Confidence</p>
+                    <p className="font-medium text-white">{formatPercentage(selectedClaim.fraud_explanation_confidence)}</p>
+                  </div>
+                  <div className="p-3 bg-gray-700 rounded">
+                    <p className="text-gray-400">Explanation Source</p>
+                    <p className="font-medium text-white">{selectedClaim.fraud_explanation_source || 'audit_reason'}</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Flags */}
               <div className="flex flex-wrap gap-2">
                 {selectedClaim.syndicate_flag && (
                   <Badge variant="destructive">
@@ -275,11 +303,67 @@ export default function AdminClaimsPage() {
                 )}
               </div>
 
-              {/* Audit Reason */}
-              {selectedClaim.audit_reason && (
-                <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded">
-                  <p className="text-sm font-medium text-yellow-400">Audit Reason</p>
-                  <p className="text-sm text-yellow-300">{selectedClaim.audit_reason}</p>
+              <div className="space-y-3 rounded border border-gray-700 bg-gray-900/60 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-white">LLM Explanation</p>
+                  <span className="text-xs uppercase tracking-wide text-gray-400">
+                    {selectedClaim.fraud_explanation_source || 'audit_reason'}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-200">
+                  {selectedClaim.fraud_explanation || selectedClaim.audit_reason || 'No explanation available for this claim.'}
+                </p>
+                {selectedClaim.audit_reason && (
+                  <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded">
+                    <p className="text-sm font-medium text-yellow-400">Audit Reason</p>
+                    <p className="text-sm text-yellow-300">{selectedClaim.audit_reason}</p>
+                  </div>
+                )}
+              </div>
+
+              {selectedClaim.fraud_top_reasons?.length ? (
+                <div className="space-y-3 rounded border border-gray-700 bg-gray-900/60 p-4">
+                  <p className="text-sm font-medium text-white">Top Factors</p>
+                  <ul className="list-disc space-y-1 pl-5 text-sm text-gray-200">
+                    {selectedClaim.fraud_top_reasons.map((reason) => (
+                      <li key={reason}>{reason}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {selectedClaim.fraud_component_scores && Object.keys(selectedClaim.fraud_component_scores).length > 0 ? (
+                <div className="space-y-3 rounded border border-gray-700 bg-gray-900/60 p-4">
+                  <p className="text-sm font-medium text-white">Component Scores</p>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {Object.entries(selectedClaim.fraud_component_scores).map(([label, value]) => (
+                      <div key={label} className="rounded bg-gray-800 p-3 text-sm">
+                        <p className="text-gray-400">{label.replace(/_/g, ' ')}</p>
+                        <p className="font-semibold text-white">{value.toFixed(2)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {claimTimeline?.timeline && claimTimeline.timeline.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-medium text-white flex items-center gap-2">
+                    <Eye className="h-4 w-4 text-cyan-400" />
+                    Claim Replay
+                  </h4>
+                  <div className="max-h-64 overflow-y-auto space-y-2 pr-1">
+                    {claimTimeline.timeline.map((event, index) => (
+                      <div key={`${event.category}-${index}`} className="rounded border border-gray-700 bg-gray-900/70 p-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-medium text-white capitalize">{event.title}</p>
+                          <span className="text-[11px] uppercase tracking-wide text-gray-400">{event.category}</span>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">{event.timestamp || 'timestamp unavailable'}</p>
+                        <p className="text-sm text-gray-300 mt-2">{event.details}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

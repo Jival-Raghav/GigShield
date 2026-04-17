@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 import hashlib
 import random
 from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
 
 
 def _seeded_rng(zone_id: str) -> random.Random:
@@ -14,6 +17,7 @@ def _seeded_rng(zone_id: str) -> random.Random:
 
 def get_curfew_status(zone_id: str) -> dict:
     """Return mock curfew status for a zone."""
+    logger.warning("Using mock curfew data for zone %s.", zone_id)
     rng = _seeded_rng(zone_id)
     score = rng.random()
 

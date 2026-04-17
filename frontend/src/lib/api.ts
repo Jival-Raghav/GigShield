@@ -3,6 +3,8 @@ import type {
   Worker,
   WorkerCreate,
   WorkerUpdate,
+  WorkerLocationTraceCreate,
+  WorkerLocationTraceResponse,
   Policy,
   PolicyCreate,
   PremiumQuote,
@@ -14,13 +16,18 @@ import type {
   ClaimCreate,
   ClaimStatusUpdate,
   Payout,
+  PayoutGateway,
   OtpRequestPayload,
   OtpRequestResponse,
   OtpVerifyPayload,
   LoginResponse,
   AdminDashboard,
+  FraudClusterMapResponse,
   FlaggedClaim,
   AdminPayoutLogItem,
+  ClaimTimelineResponse,
+  ClaimScenarioInput,
+  ClaimScenarioResult,
 } from '@/types';
 
 // ============ AUTH ============
@@ -54,6 +61,11 @@ export const workersApi = {
     const { data } = await api.put<Worker>(`/workers/${workerId}`, payload);
     return data;
   },
+
+  addLocationTrace: async (payload: WorkerLocationTraceCreate): Promise<WorkerLocationTraceResponse> => {
+    const { data } = await api.post<WorkerLocationTraceResponse>('/workers/location/trace', payload);
+    return data;
+  },
 };
 
 // ============ BASELINE & PREMIUM ============
@@ -78,6 +90,11 @@ export const policiesApi = {
     return data;
   },
 
+  delete: async (policyId: string): Promise<Policy> => {
+    const { data } = await api.delete<Policy>(`/policies/${policyId}`);
+    return data;
+  },
+
   getByWorkerId: async (workerId: string): Promise<Policy[]> => {
     const { data } = await api.get<Policy[]>(`/policies/${workerId}`);
     return data;
@@ -94,6 +111,11 @@ export const triggersApi = {
 
   getActive: async (zoneId: string): Promise<Disruption[]> => {
     const { data } = await api.get<Disruption[]>(`/triggers/active/${zoneId}`);
+    return data;
+  },
+
+  getClaimable: async (zoneId: string): Promise<Disruption[]> => {
+    const { data } = await api.get<Disruption[]>(`/triggers/claimable/${zoneId}`);
     return data;
   },
 
@@ -130,8 +152,10 @@ export const claimsApi = {
 // ============ PAYOUTS ============
 
 export const payoutsApi = {
-  initiate: async (claimId: string): Promise<Payout> => {
-    const { data } = await api.post<Payout>(`/payouts/${claimId}/initiate`);
+  initiate: async (claimId: string, gateway: PayoutGateway = 'upi_simulator'): Promise<Payout> => {
+    const { data } = await api.post<Payout>(`/payouts/${claimId}/initiate`, null, {
+      params: { gateway },
+    });
     return data;
   },
 };
@@ -153,6 +177,11 @@ export const adminApi = {
 
   getZoneRisk: async (): Promise<{ zone_id: string; disruption_count: number; avg_severity: number }[]> => {
     const { data } = await api.get('/admin/zones/risk');
+    return data;
+  },
+
+  getFraudClusters: async (): Promise<FraudClusterMapResponse> => {
+    const { data } = await api.get<FraudClusterMapResponse>('/admin/fraud/clusters');
     return data;
   },
 
@@ -179,6 +208,16 @@ export const adminApi = {
     const { data } = await api.get<AdminPayoutLogItem[]>('/admin/payouts/log', {
       params: { limit },
     });
+    return data;
+  },
+
+  getClaimTimeline: async (claimId: string): Promise<ClaimTimelineResponse> => {
+    const { data } = await api.get<ClaimTimelineResponse>(`/admin/claims/${claimId}/timeline`);
+    return data;
+  },
+
+  simulateClaim: async (claimId: string, payload: ClaimScenarioInput): Promise<ClaimScenarioResult> => {
+    const { data } = await api.post<ClaimScenarioResult>(`/admin/claims/${claimId}/simulate`, payload);
     return data;
   },
 };

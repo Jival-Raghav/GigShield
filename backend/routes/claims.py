@@ -19,9 +19,15 @@ from models.payout import Payout, PaymentStatusEnum
 from models.worker import Worker
 from schemas.claim import ClaimCreate, ClaimResponse, ClaimStatusUpdate
 from services import premium_engine
-from services.claim_processing import evaluate_and_assign_claim
+from services.claim_processing import evaluate_and_assign_claim, try_auto_pay_claim
 
 router = APIRouter(tags=["Claims"])
+
+
+def _sanitize_for_worker(claim: Claim) -> ClaimResponse:
+    data = ClaimResponse.model_validate(claim).model_dump()
+    data["audit_reason"] = None
+    return ClaimResponse(**data)
 
 
 @router.post("/claims/initiate", response_model=ClaimResponse, status_code=status.HTTP_201_CREATED)
@@ -30,6 +36,9 @@ def initiate_claim(
     db: Session = Depends(get_db),
     current_worker: Worker = Depends(get_current_worker),
 ) -> Claim:
+    if current_worker.id != payload.worker_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot initiate claim for another worker")
+
     worker = db.query(Worker).filter(Worker.id == payload.worker_id).first()
     policy = db.query(Policy).filter(Policy.id == payload.policy_id).first()
     disruption = db.query(Disruption).filter(Disruption.id == payload.disruption_id).first()
@@ -40,6 +49,28 @@ def initiate_claim(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Policy not found")
     if disruption is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Disruption not found")
+    if policy.worker_id != worker.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Policy does not belong to worker")
+    if not policy.is_active:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Active policy is required")
+    if disruption.zone_id != worker.micro_zone_id:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Disruption is not in worker zone")
+    if disruption.ended_at is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Manual claims are allowed only after the disruption has ended",
+        )
+
+    existing_claim = (
+        db.query(Claim)
+        .filter(Claim.worker_id == payload.worker_id, Claim.disruption_id == payload.disruption_id)
+        .first()
+    )
+    if existing_claim is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Claim already exists for this disruption",
+        )
 
     claim = Claim(
         worker_id=payload.worker_id,
@@ -54,12 +85,18 @@ def initiate_claim(
         disruption=disruption,
         claim=claim,
         db=db,
+        latitude=payload.latitude,
+        longitude=payload.longitude,
+        accuracy_meters=payload.accuracy_meters,
+        ip_address=payload.ip_address,
     )
 
     db.add(claim)
+    db.flush()
+    try_auto_pay_claim(claim=claim, policy=policy, db=db)
     db.commit()
     db.refresh(claim)
-    return claim
+    return _sanitize_for_worker(claim)
 
 
 @router.get("/claims/{claim_id}", response_model=ClaimResponse, status_code=status.HTTP_200_OK)
@@ -71,7 +108,7 @@ def get_claim(
     claim = db.query(Claim).filter(Claim.id == claim_id).first()
     if claim is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Claim not found")
-    return claim
+    return _sanitize_for_worker(claim)
 
 
 @router.get("/claims/worker/{worker_id}", response_model=list[ClaimResponse], status_code=status.HTTP_200_OK)
@@ -80,7 +117,8 @@ def list_worker_claims(
     db: Session = Depends(get_db),
     current_worker: Worker = Depends(get_current_worker),
 ) -> list[Claim]:
-    return db.query(Claim).filter(Claim.worker_id == worker_id).order_by(Claim.created_at.desc()).all()
+    rows = db.query(Claim).filter(Claim.worker_id == worker_id).order_by(Claim.created_at.desc()).all()
+    return [_sanitize_for_worker(row) for row in rows]
 
 
 @router.post("/claims/{claim_id}/status", response_model=ClaimResponse, status_code=status.HTTP_200_OK)

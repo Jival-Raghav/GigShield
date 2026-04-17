@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { usePolicies } from '@/hooks';
+import { useDeletePolicy, usePolicies } from '@/hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,12 +20,30 @@ import {
   TrendingUp,
   CheckCircle,
   XCircle,
+  Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function PoliciesPage() {
   const { worker } = useAuth();
   const { data: policies, isLoading, error, refetch } = usePolicies(worker?.id || null);
+  const deletePolicyMutation = useDeletePolicy();
+
+  const handleDeletePolicy = async (policyId: string) => {
+    if (!worker) return;
+
+    const confirmed = window.confirm('Delete this active policy? You can create a new one anytime.');
+    if (!confirmed) return;
+
+    try {
+      await deletePolicyMutation.mutateAsync({ policyId, workerId: worker.id });
+      toast.success('Policy deleted successfully');
+      refetch();
+    } catch {
+      toast.error('Failed to delete policy. Please try again.');
+    }
+  };
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -53,6 +71,10 @@ export default function PoliciesPage() {
         </Link>
       </div>
 
+      <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        Creating a new policy will automatically deactivate your current active policy.
+      </div>
+
       {/* Active Policies */}
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Active Policies</h2>
@@ -66,10 +88,21 @@ export default function PoliciesPage() {
                       <Shield className="h-5 w-5 text-green-600" />
                       {policy.coverage_tier.charAt(0).toUpperCase() + policy.coverage_tier.slice(1)} Plan
                     </CardTitle>
-                    <Badge className="bg-green-100 text-green-700">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Active
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-green-100 text-green-700">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Active
+                      </Badge>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeletePolicy(policy.id)}
+                        disabled={deletePolicyMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   <CardDescription>
                     Created on {formatDate(policy.created_at)}

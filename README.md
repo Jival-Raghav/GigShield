@@ -219,6 +219,8 @@ Good behaviour earns premium discounts. Gaming is penalised gradually across a 5
 | Frontend | React PWA | Worker dashboard + insurer admin panel |
 | Infrastructure | AWS / GCP | Zone-level model serving |
 
+The backend also supports optional environment toggles for live traffic providers, RSS headline classification, fraud explanation LLMs, and forecast/anomaly backend selection. Fill those values in [backend/.env.example](backend/.env.example) when you connect real APIs.
+
 **Platform choice: Progressive Web App, not native mobile**
 
 Delivery workers switch phones frequently and app store installations create friction at onboarding. A PWA works on any Android browser, installs to the home screen in one tap, and supports low-connectivity zones via service workers.

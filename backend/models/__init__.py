@@ -6,6 +6,7 @@ from models.policy import CoverageTierEnum, Policy
 from models.payout import PaymentMethodEnum, PaymentStatusEnum, Payout
 from models.worker import PlatformEnum, VehicleTypeEnum, Worker
 from models.worker_income import PeerClusterStats, WorkerDailyIncome
+from models.worker_location_trace import WorkerLocationTrace
 
 __all__ = [
     "Worker",
@@ -22,4 +23,5 @@ __all__ = [
     "PaymentStatusEnum",
     "WorkerDailyIncome",
     "PeerClusterStats",
+    "WorkerLocationTrace",
 ]

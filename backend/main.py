@@ -69,3 +69,6 @@ app.include_router(claims_router, prefix="/api/v1")
 app.include_router(triggers_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(payouts_router, prefix="/api/v1")
+
+# Backward-compatible auth routes for clients still calling /auth/* directly.
+app.include_router(auth_router)

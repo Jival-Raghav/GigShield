@@ -18,6 +18,8 @@ class LoginResponse(BaseModel):
     expires_at: datetime
     worker_id: UUID
     is_admin: bool
+    phone: str
+    display_name: str
 
 
 class OtpRequest(BaseModel):

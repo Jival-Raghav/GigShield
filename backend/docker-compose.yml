@@ -21,19 +21,22 @@ services:
       - "6379:6379"
 
   backend:
-    build: ./backend
+    image: python:3.13-slim
     container_name: gigshield-backend
     working_dir: /app/backend
     command: sh -c "pip install --no-cache-dir -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     env_file:
       - .env
+    environment:
+      DATABASE_URL: postgresql://gigshield:gigshield123@postgres:5432/gigshield
+      REDIS_URL: redis://redis:6379
     ports:
       - "8000:8000"
     depends_on:
       - postgres
       - redis
     volumes:
-      - ../:/app
+      - ./:/app/backend
 
 volumes:
   postgres_data:

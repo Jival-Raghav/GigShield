@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import json
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
@@ -16,10 +17,13 @@ from sklearn.metrics import classification_report, mean_absolute_error
 from sklearn.model_selection import KFold, StratifiedKFold
 from sqlalchemy.orm import Session
 
+from config import settings
 from database import SessionLocal
 from mock_apis import get_aqi, get_rainfall
 from models.disruption import Disruption
 from models.worker import Worker
+
+logger = logging.getLogger(__name__)
 
 FEATURE_COLUMNS = [
     "week_of_year",
@@ -45,6 +49,13 @@ SYNTHETIC_ZONE_CONFIG = {
 }
 
 
+def _selected_family() -> str:
+    family = settings.risk_forecast_model_family
+    if family in {"xgboost", "lightgbm", "gradient_boosting"}:
+        return family
+    return "gradient_boosting"
+
+
 def _week_start(dt: datetime) -> datetime:
     base = dt.astimezone(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     return base - timedelta(days=base.weekday())
@@ -61,6 +72,7 @@ def _zone_risk_bucket(zone_id: str) -> int:
 
 def _signal_pressure(zone_id: str) -> float:
     """Approximate disruption pressure from mock weather and AQI signals."""
+    logger.warning("Using mock weather and AQI data while training risk model for zone %s.", zone_id)
     rainfall = get_rainfall(zone_id)
     aqi = get_aqi(zone_id)
 
@@ -238,6 +250,73 @@ def _to_matrix(rows: list[dict]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return x, y_prob, y_sev
 
 
+def _build_probability_model(family: str):
+    if family == "xgboost":
+        try:
+            from xgboost import XGBClassifier
+
+            return XGBClassifier(
+                n_estimators=120,
+                max_depth=4,
+                learning_rate=0.08,
+                subsample=0.9,
+                colsample_bytree=0.9,
+                eval_metric="logloss",
+                random_state=42,
+                n_jobs=4,
+            )
+        except Exception:
+            pass
+    if family == "lightgbm":
+        try:
+            from lightgbm import LGBMClassifier
+
+            return LGBMClassifier(
+                n_estimators=160,
+                learning_rate=0.06,
+                num_leaves=31,
+                subsample=0.9,
+                colsample_bytree=0.9,
+                random_state=42,
+            )
+        except Exception:
+            pass
+    return GradientBoostingClassifier(random_state=42)
+
+
+def _build_severity_model(family: str):
+    if family == "xgboost":
+        try:
+            from xgboost import XGBRegressor
+
+            return XGBRegressor(
+                n_estimators=120,
+                max_depth=4,
+                learning_rate=0.08,
+                subsample=0.9,
+                colsample_bytree=0.9,
+                random_state=42,
+                n_jobs=4,
+            )
+        except Exception:
+            pass
+    if family == "lightgbm":
+        try:
+            from lightgbm import LGBMRegressor
+
+            return LGBMRegressor(
+                n_estimators=160,
+                learning_rate=0.06,
+                num_leaves=31,
+                subsample=0.9,
+                colsample_bytree=0.9,
+                random_state=42,
+            )
+        except Exception:
+            pass
+    return GradientBoostingRegressor(random_state=42)
+
+
 def _print_class_counts(label: str, y: np.ndarray) -> None:
     counts = Counter(int(v) for v in y.tolist())
     print(f"{label}: class_0={counts.get(0, 0)}, class_1={counts.get(1, 0)}")
@@ -253,6 +332,7 @@ def _build_smote(y: np.ndarray) -> SMOTE:
 
 def _train_and_save(rows: list[dict]) -> None:
     x, y_prob, y_sev = _to_matrix(rows)
+    family = _selected_family()
 
     if len(np.unique(y_prob)) < 2:
         raise RuntimeError("Classifier requires both classes. Add more disruption data before training.")
@@ -269,7 +349,7 @@ def _train_and_save(rows: list[dict]) -> None:
         smote_fold = _build_smote(y_train_fold)
         x_train_bal, y_train_bal = smote_fold.fit_resample(x_train_fold, y_train_fold)
 
-        clf_fold = GradientBoostingClassifier(random_state=42)
+        clf_fold = _build_probability_model(family)
         clf_fold.fit(x_train_bal, y_train_bal)
         y_pred_cv[test_idx] = clf_fold.predict(x_test_fold)
 
@@ -280,7 +360,7 @@ def _train_and_save(rows: list[dict]) -> None:
     x_balanced, y_balanced = smote_full.fit_resample(x, y_prob)
     _print_class_counts("After SMOTE", y_balanced)
 
-    prob_model = GradientBoostingClassifier(random_state=42)
+    prob_model = _build_probability_model(family)
     prob_model.fit(x_balanced, y_balanced)
 
     disrupted_idx = np.where(y_prob == 1)[0]
@@ -300,22 +380,26 @@ def _train_and_save(rows: list[dict]) -> None:
         x_train_sev, x_test_sev = x_sev[train_idx], x_sev[test_idx]
         y_train_sev, y_test_sev = y_sev_only[train_idx], y_sev_only[test_idx]
 
-        sev_fold = GradientBoostingRegressor(random_state=42)
+        sev_fold = _build_severity_model(family)
         sev_fold.fit(x_train_sev, y_train_sev)
         y_pred_sev = sev_fold.predict(x_test_sev)
         fold_mae.append(mean_absolute_error(y_test_sev, y_pred_sev))
 
     mae = float(np.mean(fold_mae))
 
-    sev_model = GradientBoostingRegressor(random_state=42)
+    sev_model = _build_severity_model(family)
     sev_model.fit(x_sev, y_sev_only)
 
     print("\n=== Severity Model (Regressor) ===")
     print(f"MAE: {mae:.4f}")
 
     ml_dir = Path(__file__).resolve().parent
-    joblib.dump(prob_model, ml_dir / "risk_probability_model.joblib")
-    joblib.dump(sev_model, ml_dir / "risk_severity_model.joblib")
+    if family == "gradient_boosting":
+        joblib.dump(prob_model, ml_dir / "risk_probability_model.joblib")
+        joblib.dump(sev_model, ml_dir / "risk_severity_model.joblib")
+    else:
+        joblib.dump(prob_model, ml_dir / f"risk_probability_model_{family}.joblib")
+        joblib.dump(sev_model, ml_dir / f"risk_severity_model_{family}.joblib")
 
     with (ml_dir / "feature_columns.json").open("w", encoding="utf-8") as f:
         json.dump(FEATURE_COLUMNS, f, indent=2)

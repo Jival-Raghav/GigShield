@@ -13,6 +13,7 @@ from models.policy import Policy
 from models.worker import PlatformEnum, Worker
 from models.worker_income import PeerClusterStats, WorkerDailyIncome
 from services import baseline_engine
+from services.intelligence_signals import get_zone_intelligence_snapshot
 
 
 def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
@@ -243,11 +244,13 @@ def calculate_payout(
 
     severity_smoothed, prime_overlap_hours = _time_weighted_severity(float(disruption.severity), disruption)
     effective_overlap_hours = min(shift_overlap_hours, max(prime_overlap_hours, 0.5))
+    intelligence = get_zone_intelligence_snapshot(worker.micro_zone_id)
+    signal_pressure = float(intelligence.get("signal_pressure", 0.0))
 
     eligible_hours = min(effective_overlap_hours, worker_avg_daily_hours, platform_max_hours)
     eligible_hours = max(0.0, eligible_hours)
 
-    income_lost = hourly_income * eligible_hours * severity_smoothed
+    income_lost = hourly_income * eligible_hours * severity_smoothed * (1.0 + (signal_pressure * 0.15))
 
     # Weekly cap is applied by the weekly settlement engine across all approved claims.
     adjusted_payout = income_lost * float(policy.coverage_ratio) * _clamp(float(baf_score), 0.0, 1.0)
@@ -256,6 +259,7 @@ def calculate_payout(
         "income_lost": round(max(income_lost, 0.0), 2),
         "eligible_hours": round(eligible_hours, 2),
         "severity_smoothed": round(severity_smoothed, 3),
+        "signal_pressure": round(signal_pressure, 3),
         "hourly_income": round(max(hourly_income, 0.0), 2),
         "uncapped_payout": round(max(adjusted_payout, 0.0), 2),
         "adjusted_payout": round(max(adjusted_payout, 0.0), 2),

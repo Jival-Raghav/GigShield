@@ -9,7 +9,9 @@ from sqlalchemy.orm import Session
 from database import get_db
 from dependencies import get_current_worker
 from models.worker import Worker
-from schemas.worker import WorkerCreate, WorkerResponse, WorkerUpdate
+from models.worker_location_trace import WorkerLocationTrace
+from schemas.worker import WorkerCreate, WorkerLocationTraceCreate, WorkerLocationTraceResponse, WorkerResponse, WorkerUpdate
+from services.zone_granularity import map_coordinates_to_zone
 from services import registration_service
 
 router = APIRouter(tags=["Registration"])
@@ -64,3 +66,31 @@ def update_worker(
     db.commit()
     db.refresh(worker)
     return worker
+
+
+@router.post("/workers/location/trace", response_model=WorkerLocationTraceResponse, status_code=status.HTTP_200_OK)
+def add_location_trace(
+    payload: WorkerLocationTraceCreate,
+    db: Session = Depends(get_db),
+    current_worker: Worker = Depends(get_current_worker),
+) -> WorkerLocationTraceResponse:
+    mapped = map_coordinates_to_zone(payload.latitude, payload.longitude)
+
+    trace = WorkerLocationTrace(
+        worker_id=current_worker.id,
+        latitude=float(payload.latitude),
+        longitude=float(payload.longitude),
+        accuracy_meters=payload.accuracy_meters,
+        source=str(payload.source or "browser_periodic")[:32],
+        mapped_parent_zone_id=(mapped or {}).get("parent_zone_id"),
+        mapped_fine_zone_id=(mapped or {}).get("fine_zone_id"),
+    )
+
+    db.add(trace)
+    db.commit()
+
+    return WorkerLocationTraceResponse(
+        mapped_parent_zone_id=trace.mapped_parent_zone_id,
+        mapped_fine_zone_id=trace.mapped_fine_zone_id,
+        accepted=True,
+    )

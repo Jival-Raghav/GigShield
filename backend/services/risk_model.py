@@ -9,7 +9,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import numpy as np
+from config import settings
 from mock_apis import get_aqi, get_rainfall
+from services.intelligence_signals import get_zone_intelligence_series, get_zone_intelligence_snapshot
 
 from sqlalchemy.orm import Session
 
@@ -43,6 +45,13 @@ _MODEL_CACHE: dict[str, object] = {
 }
 
 
+def _family_suffix() -> str:
+    family = settings.risk_forecast_model_family
+    if family in {"xgboost", "lightgbm", "gradient_boosting"}:
+        return family
+    return "gradient_boosting"
+
+
 def _week_start(dt: datetime) -> datetime:
     base = dt.astimezone(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     return base - timedelta(days=base.weekday())
@@ -60,11 +69,13 @@ def _zone_risk_bucket(zone_id: str) -> int:
 def _signal_pressure(zone_id: str) -> float:
     rainfall = get_rainfall(zone_id)
     aqi = get_aqi(zone_id)
+    intelligence = get_zone_intelligence_snapshot(zone_id)
     rainfall_mm = float(rainfall.get("rainfall_mm_per_hr", 0.0))
     aqi_value = float(aqi.get("aqi", 0.0))
     rainfall_score = min(rainfall_mm / 100.0, 1.0)
     aqi_score = min(max(aqi_value - 100.0, 0.0) / 400.0, 1.0)
-    return float(np.clip(0.55 * rainfall_score + 0.45 * aqi_score, 0.0, 1.0))
+    intelligence_score = float(intelligence.get("signal_pressure", 0.0))
+    return float(np.clip((0.4 * rainfall_score) + (0.3 * aqi_score) + (0.3 * intelligence_score), 0.0, 1.0))
 
 
 def _platform_volatility_index(zone_id: str, db: Session) -> float:
@@ -147,6 +158,7 @@ def _build_live_features(zone_id: str, db: Session, now: datetime) -> tuple[dict
 
 def _statistical_fallback(zone_id: str, db: Session) -> dict:
     """Statistical fallback used when model artifacts are unavailable."""
+    logger.warning("Using mock risk fallback for zone %s.", zone_id)
     now = datetime.now(timezone.utc)
     window_start = now - timedelta(days=84)
 
@@ -230,11 +242,24 @@ def _load_models_once() -> tuple[object | None, object | None, list[str]]:
     _MODEL_CACHE["initialized"] = True
 
     ml_dir = Path(__file__).resolve().parents[1] / "ml"
-    probability_model_path = ml_dir / "risk_probability_model.joblib"
-    severity_model_path = ml_dir / "risk_severity_model.joblib"
+    family = _family_suffix()
+    candidate_suffixes = [family]
+    if family != "gradient_boosting":
+        candidate_suffixes.append("gradient_boosting")
+
+    probability_model_path = None
+    severity_model_path = None
+    for suffix in candidate_suffixes:
+        prob_path = ml_dir / ("risk_probability_model.joblib" if suffix == "gradient_boosting" else f"risk_probability_model_{suffix}.joblib")
+        sev_path = ml_dir / ("risk_severity_model.joblib" if suffix == "gradient_boosting" else f"risk_severity_model_{suffix}.joblib")
+        if prob_path.exists() and sev_path.exists():
+            probability_model_path = prob_path
+            severity_model_path = sev_path
+            break
+
     feature_columns_path = ml_dir / "feature_columns.json"
 
-    if not (probability_model_path.exists() and severity_model_path.exists() and feature_columns_path.exists()):
+    if not (probability_model_path and severity_model_path and feature_columns_path.exists()):
         logger.warning("Risk model artifacts missing in %s. Falling back to statistical estimate.", ml_dir)
         return None, None, FEATURE_COLUMNS_DEFAULT
 
@@ -261,6 +286,7 @@ def estimate_weekly_risk(zone_id: str, db: Session) -> dict:
     """Predict coming-week disruption risk using trained models, with safe fallback."""
     probability_model, severity_model, feature_columns = _load_models_once()
     if probability_model is None or severity_model is None:
+        logger.warning("Using mock risk fallback for zone %s because trained model artifacts are unavailable.", zone_id)
         return _statistical_fallback(zone_id=zone_id, db=db)
 
     now = datetime.now(timezone.utc)
@@ -274,6 +300,7 @@ def estimate_weekly_risk(zone_id: str, db: Session) -> dict:
         expected_severity = float(np.clip(severity_model.predict(x)[0], 0.0, 1.0))
     except Exception as exc:
         logger.warning("Risk model prediction failed: %s. Falling back to statistical estimate.", exc)
+        logger.warning("Using mock risk fallback for zone %s because prediction failed.", zone_id)
         return _statistical_fallback(zone_id=zone_id, db=db)
 
     return {
@@ -283,3 +310,37 @@ def estimate_weekly_risk(zone_id: str, db: Session) -> dict:
         "used_fallback": False,
         "model_confidence": round(float(np.clip(model_confidence, 0.0, 1.0)), 3),
     }
+
+
+def forecast_zone_risk_series(zone_id: str, db: Session, days: int = 7) -> list[dict]:
+    """Return a 7-day zone risk series for the dashboard."""
+    base = estimate_weekly_risk(zone_id=zone_id, db=db)
+    signal_series = get_zone_intelligence_series(zone_id, days=days)
+    series: list[dict] = []
+
+    for day_offset, signal in enumerate(signal_series):
+        signal_pressure = float(signal.get("signal_pressure", 0.0))
+        holiday_boost = 0.12 if signal.get("holiday_active") else 0.0
+        weekend_boost = 0.08 if datetime.fromisoformat(signal["forecast_date"]).weekday() >= 5 else 0.0
+        daily_multiplier = 1.0 + (signal_pressure * 0.65) + holiday_boost + weekend_boost
+        projected_disruption_days = min(7.0, float(base["expected_disruption_days"]) * daily_multiplier / 1.8)
+        projected_severity = min(1.0, float(base["expected_severity"]) * (0.85 + signal_pressure * 0.35))
+
+        series.append(
+            {
+                "zone_id": zone_id,
+                "forecast_date": signal["forecast_date"],
+                "day_offset": day_offset,
+                "signal_pressure": round(signal_pressure, 3),
+                "holiday_active": bool(signal.get("holiday_active")),
+                "windspeed_10m_max_kph": float(signal.get("windspeed_10m_max_kph", 0.0)),
+                "precipitation_sum_mm": float(signal.get("precipitation_sum_mm", 0.0)),
+                "news_risk": float(signal.get("news_risk", 0.0)),
+                "fire_risk": float(signal.get("fire_risk", 0.0)),
+                "projected_disruption_days": round(projected_disruption_days, 3),
+                "projected_severity": round(projected_severity, 3),
+                "forecast_confidence": round(float(base.get("model_confidence", 0.0)) * (0.9 + (0.1 - signal_pressure * 0.03)), 3),
+            }
+        )
+
+    return series

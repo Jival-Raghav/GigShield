@@ -22,6 +22,17 @@ export function useCreatePolicy() {
   });
 }
 
+export function useDeletePolicy() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ policyId }: { policyId: string; workerId: string }) => policiesApi.delete(policyId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['policies', variables.workerId] });
+    },
+  });
+}
+
 export function useBaseline(workerId: string | null) {
   return useQuery({
     queryKey: ['baseline', workerId],

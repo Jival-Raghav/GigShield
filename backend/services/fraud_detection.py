@@ -80,31 +80,67 @@ def get_zone_disruption_snapshot(zone_id: str) -> dict:
    }
 
 
-def build_claim_metadata(worker: Worker, claimed_zone_id: str) -> dict:
-   """Build spoofing metadata from mock telemetry APIs."""
+def build_claim_metadata(
+   worker: Worker,
+   claimed_zone_id: str,
+   db: Session | None = None,
+   latitude: float | None = None,
+   longitude: float | None = None,
+   accuracy_meters: float | None = None,
+   ip_address: str | None = None,
+   claim_timestamp: datetime | None = None,
+) -> dict:
+   """Build spoofing metadata from deterministic telemetry helpers."""
    worker_id = str(worker.id)
    disruption_context = get_zone_disruption_snapshot(claimed_zone_id)
    severity_index = float(disruption_context["severity_index"])
 
-   gps_signal = get_gps_signal(worker_id=worker_id, claimed_zone_id=claimed_zone_id, home_zone_id=worker.micro_zone_id)
-   cell_signal = get_cell_tower_signal(worker_id=worker_id, claimed_zone_id=claimed_zone_id)
-   ip_signal = get_ip_geolocation_signal(worker_id=worker_id, claimed_zone_id=claimed_zone_id)
-   motion_signal = get_motion_signal(worker_id=worker_id, claimed_zone_id=claimed_zone_id)
    activity_signal = get_order_activity_signal(
       worker_id=worker_id,
       claimed_zone_id=claimed_zone_id,
       disruption_severity=severity_index,
+      db=db,
+      claim_timestamp=claim_timestamp,
+   )
+   gps_signal = get_gps_signal(
+      worker_id=worker_id,
+      claimed_zone_id=claimed_zone_id,
+      home_zone_id=worker.micro_zone_id,
+      latitude=latitude,
+      longitude=longitude,
+      accuracy_meters=accuracy_meters,
+   )
+   cell_signal = get_cell_tower_signal(
+      worker_id=worker_id,
+      claimed_zone_id=claimed_zone_id,
+      gps_zone=gps_signal["gps_zone"],
+   )
+   ip_signal = get_ip_geolocation_signal(worker_id=worker_id, claimed_zone_id=claimed_zone_id, ip_address=ip_address)
+   motion_signal = get_motion_signal(
+      worker_id=worker_id,
+      claimed_zone_id=claimed_zone_id,
+      online_hours=activity_signal["online_hours_during"],
    )
 
    return {
+      "zone_id": claimed_zone_id,
       "gps_zone": gps_signal["gps_zone"],
+      "gps_micro_zone": gps_signal.get("gps_micro_zone"),
       "gps_confidence": gps_signal["gps_confidence"],
+      "gps_mismatch": gps_signal["gps_mismatch"],
       "cell_tower_zone": cell_signal["cell_tower_zone"],
+      "cell_tower_mismatch": cell_signal["cell_tower_mismatch"],
       "ip_zone": ip_signal["ip_zone"],
+      "ip_micro_zone": ip_signal.get("ip_micro_zone"),
+      "ip_mismatch": ip_signal["ip_mismatch"],
       "is_stationary": motion_signal["is_stationary"],
-      "acceptance_rate_during": activity_signal["acceptance_rate_during"],
+      "before_acceptance": activity_signal["before_acceptance"],
+      "during_acceptance": activity_signal["during_acceptance"],
+      "acceptance_drop": activity_signal["acceptance_drop"],
+      "before_online_hours": activity_signal["before_online_hours"],
       "online_hours_during": activity_signal["online_hours_during"],
-      "claim_timestamp": datetime.now(timezone.utc),
+      "acceptance_rate_during": activity_signal["acceptance_rate_during"],
+      "claim_timestamp": claim_timestamp if isinstance(claim_timestamp, datetime) else datetime.now(timezone.utc),
       "disruption_context": disruption_context,
    }
 
@@ -169,14 +205,16 @@ def run_spoofing_check(worker: Worker, claimed_zone_id: str, claim_metadata: dic
    cell_tower_zone = str(claim_metadata.get("cell_tower_zone", ""))
    ip_zone = str(claim_metadata.get("ip_zone", ""))
    is_stationary = bool(claim_metadata.get("is_stationary", True))
-   acceptance_rate = float(claim_metadata.get("acceptance_rate_during", 0.0))
+   before_acceptance = float(claim_metadata.get("before_acceptance", 0.0))
+   during_acceptance = float(claim_metadata.get("during_acceptance", claim_metadata.get("acceptance_rate_during", 0.0)))
+   acceptance_drop = float(claim_metadata.get("acceptance_drop", max(0.0, before_acceptance - during_acceptance)))
 
-   gps_match = gps_confidence > 0.75 or gps_zone == claimed_zone_id
+   gps_match = gps_confidence >= 0.75 or gps_zone == claimed_zone_id
    cell_match = cell_tower_zone == claimed_zone_id
    accel_match = not is_stationary
    ip_match = ip_zone == claimed_zone_id
    route_history_match = _evaluate_route_history(worker=worker, claimed_zone_id=claimed_zone_id, db=db)
-   acceptance_match = acceptance_rate > 0.3
+   acceptance_match = during_acceptance >= 0.3 and acceptance_drop <= 0.25
    syndicate_flag, historical_avg, recent_count = _evaluate_cluster_flag(
       claimed_zone_id=claimed_zone_id,
       claim_time=claim_time,
@@ -213,7 +251,10 @@ def run_spoofing_check(worker: Worker, claimed_zone_id: str, claim_metadata: dic
       "signals_detail": {
          **signal_results,
          "gps_confidence": gps_confidence,
-         "acceptance_rate_during": acceptance_rate,
+         "before_acceptance": before_acceptance,
+         "during_acceptance": during_acceptance,
+         "acceptance_drop": acceptance_drop,
+         "acceptance_rate_during": during_acceptance,
          "cluster_recent_count": recent_count,
          "cluster_historical_avg_per_hour": historical_avg,
       },

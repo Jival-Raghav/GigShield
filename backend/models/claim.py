@@ -6,7 +6,7 @@ import enum
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Integer, JSON, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -42,6 +42,13 @@ class Claim(Base):
     signal_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     behavior_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     unified_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    fraud_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    fraud_band: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    fraud_explanation: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    fraud_explanation_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    fraud_explanation_source: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    fraud_component_scores: Mapped[dict[str, float] | None] = mapped_column(JSON, nullable=True)
+    fraud_top_reasons: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     spoofing_signals_fired: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     syndicate_flag: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     audit_required: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

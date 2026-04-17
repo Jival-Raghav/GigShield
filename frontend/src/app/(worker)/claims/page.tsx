@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useClaims, usePolicies, useDisruptions, useInitiateClaim } from '@/hooks';
+import { useClaims, usePolicies, useDisruptions, useClaimableDisruptions, useInitiateClaim } from '@/hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,6 +53,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { isAxiosError } from 'axios';
 import type { Claim } from '@/types';
 
 export default function ClaimsPage() {
@@ -60,35 +61,112 @@ export default function ClaimsPage() {
   const { data: claims, isLoading, error, refetch } = useClaims(worker?.id || null);
   const { data: policies } = usePolicies(worker?.id || null);
   const { data: disruptions } = useDisruptions(worker?.micro_zone_id || null);
+  const { data: claimableDisruptions } = useClaimableDisruptions(worker?.micro_zone_id || null);
   const initiateMutation = useInitiateClaim();
   
   const [initiateOpen, setInitiateOpen] = useState(false);
   const [selectedPolicy, setSelectedPolicy] = useState<string | null>(null);
   const [selectedDisruption, setSelectedDisruption] = useState<string | null>(null);
   const [detailClaim, setDetailClaim] = useState<Claim | null>(null);
+  const [locationState, setLocationState] = useState<'idle' | 'requesting' | 'ready' | 'unavailable' | 'denied'>('idle');
+  const [locationChoice, setLocationChoice] = useState<'pending' | 'allow' | 'deny'>('deny');
+  const [capturedLocation, setCapturedLocation] = useState<{ latitude: number; longitude: number; accuracy_meters: number } | null>(null);
 
   const activePolicy = policies?.find((p) => p.is_active);
   const activeDisruptions = disruptions?.filter((d) => !d.ended_at) || [];
+  const claimedDisruptionIds = new Set((claims || []).map((c) => c.disruption_id));
+  const manualEligibleDisruptions = (claimableDisruptions || []).filter((d) => !claimedDisruptionIds.has(d.id));
+
+  const resetClaimState = () => {
+    setInitiateOpen(false);
+    setSelectedPolicy('');
+    setSelectedDisruption('');
+    setLocationState('denied');
+    setLocationChoice('deny');
+    setCapturedLocation(null);
+  };
+
+  const getDeviceLocation = (): Promise<{ latitude: number; longitude: number; accuracy_meters: number } | null> => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setLocationState('unavailable');
+      return Promise.resolve(null);
+    }
+
+    setLocationState('requesting');
+
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocationState('ready');
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy_meters: position.coords.accuracy,
+          });
+        },
+        (error) => {
+          if (error.code === error.PERMISSION_DENIED) {
+            setLocationState('denied');
+          } else {
+            setLocationState('unavailable');
+          }
+          resolve(null);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 8000,
+          maximumAge: 0,
+        }
+      );
+    });
+  };
+
+  const handleAllowLocation = async () => {
+    setLocationChoice('allow');
+    const location = await getDeviceLocation();
+    setCapturedLocation(location);
+  };
+
+  const handleDenyLocation = () => {
+    setLocationChoice('deny');
+    setLocationState('denied');
+    setCapturedLocation(null);
+  };
 
   const handleInitiateClaim = async () => {
     if (!worker || !selectedPolicy || !selectedDisruption) {
       toast.error('Please select policy and disruption');
       return;
     }
+
+    const location = locationChoice === 'allow' ? capturedLocation : null;
     
     try {
       await initiateMutation.mutateAsync({
         worker_id: worker.id,
         policy_id: selectedPolicy,
         disruption_id: selectedDisruption,
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+        accuracy_meters: location?.accuracy_meters,
       });
       toast.success('Claim initiated successfully!');
-      setInitiateOpen(false);
-      setSelectedPolicy('');
-      setSelectedDisruption('');
+      resetClaimState();
       refetch();
-    } catch {
-      toast.error('Failed to initiate claim');
+    } catch (error) {
+      let message = 'Failed to initiate claim';
+      if (isAxiosError(error)) {
+        const detail = error.response?.data?.detail;
+        if (typeof detail === 'string' && detail.trim().length > 0) {
+          message = detail;
+        } else if (Array.isArray(detail) && detail.length > 0) {
+          const first = detail[0];
+          if (first?.msg) {
+            message = first.msg;
+          }
+        }
+      }
+      toast.error(message);
     }
   };
 
@@ -114,7 +192,7 @@ export default function ClaimsPage() {
           <p className="text-gray-500 mt-1">Manage your insurance claims</p>
         </div>
         <Button 
-          disabled={!activePolicy || activeDisruptions.length === 0}
+          disabled={!activePolicy || manualEligibleDisruptions.length === 0}
           onClick={() => setInitiateOpen(true)}
         >
           <Plus className="mr-2 h-4 w-4" />
@@ -127,9 +205,26 @@ export default function ClaimsPage() {
             <DialogHeader>
               <DialogTitle>Initiate New Claim</DialogTitle>
               <DialogDescription>
-                Select the policy and disruption to file a claim.
+                Manual claims are allowed only for ended disruptions not already captured by auto/manual claims.
               </DialogDescription>
             </DialogHeader>
+            <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+              <p className="font-medium">Device location</p>
+              <p>
+                {locationChoice === 'allow' && locationState === 'ready' && 'Location captured for this claim.'}
+                {locationChoice === 'allow' && locationState === 'requesting' && 'Requesting device location...'}
+                {locationChoice === 'allow' && locationState === 'unavailable' && 'Device location is unavailable in this browser. The claim will still submit.'}
+                {locationChoice === 'deny' && 'Location is optional and currently disabled for this claim. The claim will still submit.'}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button type="button" size="sm" variant={locationChoice === 'allow' ? 'default' : 'outline'} onClick={handleAllowLocation} disabled={locationState === 'requesting'}>
+                  Allow location
+                </Button>
+                <Button type="button" size="sm" variant={locationChoice === 'deny' ? 'default' : 'outline'} onClick={handleDenyLocation}>
+                  Deny location
+                </Button>
+              </div>
+            </div>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Policy</label>
@@ -150,12 +245,12 @@ export default function ClaimsPage() {
                 <label className="text-sm font-medium">Disruption</label>
                 <Select value={selectedDisruption} onValueChange={(v) => setSelectedDisruption(v)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select disruption" />
+                    <SelectValue placeholder="Select ended disruption" />
                   </SelectTrigger>
                   <SelectContent className="w-[270px]">
-                    {activeDisruptions.map((disruption) => (
+                    {manualEligibleDisruptions.map((disruption) => (
                       <SelectItem key={disruption.id} value={disruption.id}>
-                        {disruption.disruption_type.replace('_', ' ')} - Severity {formatPercentage(disruption.severity)}
+                        {disruption.disruption_type.replace('_', ' ')} - Severity {formatPercentage(disruption.severity)} - Ended {formatDateTime(disruption.ended_at!)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -163,7 +258,7 @@ export default function ClaimsPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setInitiateOpen(false)}>
+              <Button variant="outline" onClick={resetClaimState}>
                 Cancel
               </Button>
               <Button 
@@ -240,7 +335,7 @@ export default function ClaimsPage() {
       </div>
 
       {/* Warning if no policy or no disruptions */}
-      {(!activePolicy || activeDisruptions.length === 0) && (
+      {(!activePolicy || manualEligibleDisruptions.length === 0) && (
         <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="py-4">
             <div className="flex items-start gap-3">
@@ -249,8 +344,13 @@ export default function ClaimsPage() {
                 <p className="font-medium text-yellow-800">Cannot Create New Claims</p>
                 <p className="text-sm text-yellow-700 mt-1">
                   {!activePolicy && 'You need an active policy to file claims. '}
-                  {activeDisruptions.length === 0 && 'There are no active disruptions in your zone.'}
+                  {activePolicy && manualEligibleDisruptions.length === 0 && 'No ended disruptions are currently claimable, or claims were already auto-captured.'}
                 </p>
+                {activeDisruptions.length > 0 && (
+                  <p className="text-sm text-yellow-700 mt-1">
+                    {activeDisruptions.length} disruption(s) are still active and will become manually claimable after they end.
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>
